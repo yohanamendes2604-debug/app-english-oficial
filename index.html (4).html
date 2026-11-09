@@ -1,0 +1,2036 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EnglishPlus - App de Aprendizagem de Inglês</title>
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1d4ed8;
+            --secondary: #ec4899;
+            --accent: #f59e0b;
+            --success: #10b981;
+            --danger: #ef4444;
+            --bg-light: #f8fafc;
+            --surface: #ffffff;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --border: #e2e8f0;
+            --radius-sm: 8px;
+            --radius-md: 12px;
+            --radius-lg: 20px;
+            --shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            --shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.08);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: var(--bg-light);
+            color: var(--text-main);
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            padding-bottom: 70px; /* space for mobile navbar */
+        }
+
+        header {
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
+            padding: 12px 20px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+        }
+
+        .header-container {
+            max-width: 1000px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.25rem;
+            font-weight: 800;
+            color: var(--primary);
+            text-decoration: none;
+        }
+
+        .logo span.flag {
+            font-size: 1.5rem;
+        }
+
+        .stats-bar {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .stat-badge {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background: #f1f5f9;
+            padding: 6px 12px;
+            border-radius: var(--radius-lg);
+            font-size: 0.9rem;
+            font-weight: 700;
+        }
+
+        .stat-badge.xp { color: var(--accent); background: #fef3c7; }
+        .stat-badge.streak { color: var(--secondary); background: #fce7f3; }
+        .stat-badge.level { color: var(--primary); background: #dbeafe; }
+
+        /* Bottom Nav Bar for Mobile First Design */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: var(--surface);
+            border-top: 1px solid var(--border);
+            display: flex;
+            justify-content: space-around;
+            padding: 8px 0;
+            z-index: 1000;
+            box-shadow: 0 -4px 12px rgba(0,0,0,0.05);
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            text-decoration: none;
+            cursor: pointer;
+            border: none;
+            background: none;
+            width: 16.6%;
+            transition: all 0.2s ease;
+        }
+
+        .nav-item.active {
+            color: var(--primary);
+            font-weight: 700;
+        }
+
+        .nav-item svg {
+            width: 22px;
+            height: 22px;
+            fill: currentColor;
+        }
+
+        main {
+            max-width: 1000px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 20px;
+            flex: 1;
+        }
+
+        .view {
+            display: none;
+            animation: fadeIn 0.3s ease-in-out;
+        }
+
+        .view.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .section-title {
+            font-size: 1.4rem;
+            font-weight: 800;
+            margin-bottom: 6px;
+            color: var(--text-main);
+        }
+
+        .section-desc {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            margin-bottom: 20px;
+        }
+
+        .card {
+            background: var(--surface);
+            border-radius: var(--radius-md);
+            padding: 20px;
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow);
+            margin-bottom: 20px;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 12px 20px;
+            border-radius: var(--radius-sm);
+            border: none;
+            font-weight: 700;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-decoration: none;
+        }
+
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-primary:hover { background: var(--primary-dark); }
+        .btn-secondary { background: #e2e8f0; color: var(--text-main); }
+        .btn-secondary:hover { background: #cbd5e1; }
+        .btn-success { background: var(--success); color: white; }
+        .btn-danger { background: var(--danger); color: white; }
+        .btn-full { width: 100%; }
+
+        /* Level Filter / Selector */
+        .level-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .level-card {
+            background: var(--surface);
+            border: 2px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 16px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .level-card:hover, .level-card.active {
+            border-color: var(--primary);
+            box-shadow: var(--shadow-lg);
+            transform: translateY(-2px);
+        }
+
+        .level-card.active::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; bottom: 0; width: 6px;
+            background: var(--primary);
+        }
+
+        .level-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .level-badge {
+            font-size: 0.75rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            padding: 4px 8px;
+            border-radius: 4px;
+            background: #eff6ff;
+            color: var(--primary);
+        }
+
+        /* Themes Grid */
+        .theme-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .theme-chip {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            padding: 12px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .theme-chip:hover, .theme-chip.active {
+            border-color: var(--primary);
+            background: #eff6ff;
+            color: var(--primary);
+            font-weight: 700;
+        }
+
+        .theme-icon {
+            font-size: 1.8rem;
+            margin-bottom: 6px;
+            display: block;
+        }
+
+        .exercise-container {
+            max-width: 650px;
+            margin: 0 auto;
+        }
+
+        .quiz-progress-bar {
+            height: 10px;
+            background: #e2e8f0;
+            border-radius: 5px;
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+
+        .quiz-progress-fill {
+            height: 100%;
+            background: var(--primary);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .prompt-box {
+            font-size: 1.25rem;
+            font-weight: 700;
+            text-align: center;
+            margin: 20px 0;
+            padding: 16px;
+            background: #f8fafc;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border);
+            position: relative;
+        }
+
+        .audio-btn {
+            background: #dbeafe;
+            color: var(--primary);
+            border: none;
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            margin-left: 8px;
+            vertical-align: middle;
+            transition: transform 0.1s;
+        }
+
+        .audio-btn:active { transform: scale(0.92); }
+
+        /* Options Grid */
+        .options-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        @media (min-width: 500px) {
+            .options-grid.two-cols {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        .option-btn {
+            background: var(--surface);
+            border: 2px solid var(--border);
+            padding: 14px 18px;
+            border-radius: var(--radius-sm);
+            font-size: 1rem;
+            font-weight: 600;
+            text-align: left;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .option-btn:hover { border-color: var(--primary); background: #f8fafc; }
+        .option-btn.selected { border-color: var(--primary); background: #eff6ff; }
+        .option-btn.correct { border-color: var(--success); background: #ecfdf5; color: var(--success); }
+        .option-btn.incorrect { border-color: var(--danger); background: #fef2f2; color: var(--danger); }
+
+        /* Word Bank (Scrambled / Ordering) */
+        .word-bank {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            min-height: 50px;
+            padding: 12px;
+            background: #f1f5f9;
+            border-radius: var(--radius-sm);
+            margin-bottom: 16px;
+        }
+
+        .word-tile {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            padding: 8px 14px;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            user-select: none;
+        }
+
+        .word-tile.used { opacity: 0.3; cursor: default; }
+
+        /* Input Controls */
+        .text-input {
+            width: 100%;
+            padding: 14px;
+            border: 2px solid var(--border);
+            border-radius: var(--radius-sm);
+            font-size: 1rem;
+            margin-bottom: 20px;
+            outline: none;
+        }
+
+        .text-input:focus { border-color: var(--primary); }
+
+        /* Speech Microphone Box */
+        .speech-box {
+            text-align: center;
+            padding: 24px;
+            background: #f8fafc;
+            border-radius: var(--radius-md);
+            margin-bottom: 20px;
+            border: 1px dashed var(--border);
+        }
+
+        .mic-btn {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            background: var(--primary);
+            color: white;
+            border: none;
+            font-size: 1.8rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 12px;
+            box-shadow: 0 4px 14px rgba(37, 99, 235, 0.4);
+            transition: all 0.2s;
+        }
+
+        .mic-btn.recording {
+            background: var(--danger);
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
+            70% { transform: scale(1.05); box-shadow: 0 0 0 15px rgba(239, 68, 68, 0); }
+            100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+        }
+
+        .disclaimer-banner {
+            font-size: 0.78rem;
+            color: var(--text-muted);
+            background: #fffbe2;
+            border: 1px solid #fde047;
+            padding: 8px 12px;
+            border-radius: 6px;
+            margin-top: 12px;
+            text-align: left;
+        }
+
+        /* Feedback Footer */
+        .feedback-sheet {
+            padding: 16px;
+            border-radius: var(--radius-sm);
+            margin-top: 16px;
+            display: none;
+        }
+
+        .feedback-sheet.correct { background: #d1fae5; color: #065f46; display: block; }
+        .feedback-sheet.incorrect { background: #fee2e2; color: #991b1b; display: block; }
+
+        .badge-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+            gap: 12px;
+        }
+
+        .badge-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            padding: 16px;
+            text-align: center;
+            opacity: 0.5;
+            filter: grayscale(1);
+        }
+
+        .badge-card.unlocked {
+            opacity: 1;
+            filter: grayscale(0);
+            border-color: var(--accent);
+            background: #fffdf0;
+        }
+
+        .badge-icon { font-size: 2.2rem; margin-bottom: 6px; }
+        .badge-title { font-weight: 700; font-size: 0.85rem; margin-bottom: 4px; }
+        .badge-desc { font-size: 0.7rem; color: var(--text-muted); }
+
+        /* Dialogue Box */
+        .chat-container {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 20px;
+            max-height: 380px;
+            overflow-y: auto;
+            padding: 10px;
+            background: #f8fafc;
+            border-radius: var(--radius-md);
+        }
+
+        .chat-bubble {
+            max-width: 80%;
+            padding: 12px 16px;
+            border-radius: 16px;
+            font-size: 0.95rem;
+            position: relative;
+        }
+
+        .chat-bubble.bot {
+            align-self: flex-start;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-bottom-left-radius: 4px;
+        }
+
+        .chat-bubble.user {
+            align-self: flex-end;
+            background: var(--primary);
+            color: white;
+            border-bottom-right-radius: 4px;
+        }
+
+        .chat-author {
+            font-size: 0.7rem;
+            font-weight: 700;
+            margin-bottom: 4px;
+            opacity: 0.8;
+        }
+
+        /* Lessons Tab */
+        .vocab-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 14px;
+            margin-top: 16px;
+        }
+
+        .vocab-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 14px 16px;
+            box-shadow: var(--shadow);
+        }
+
+        .vocab-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 4px;
+        }
+
+        .vocab-fr {
+            font-weight: 800;
+            font-size: 1.05rem;
+            color: var(--primary);
+        }
+
+        .vocab-pt {
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .vocab-pron {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-bottom: 6px;
+        }
+
+        .vocab-example {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            font-style: italic;
+        }
+
+        .video-embed-wrap {
+            position: relative;
+            width: 100%;
+            padding-top: 56.25%; /* 16:9 */
+            border-radius: 12px;
+            overflow: hidden;
+            background: #000;
+        }
+
+        .video-embed-wrap iframe {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            border: 0;
+        }
+    </style>
+<body>
+
+    <header>
+        <div class="header-container">
+            <a href="#" class="logo" onclick="switchView('learn')">
+                <span class="flag">🇺🇸</span>
+                <span>EnglishPlus</span>
+            </a>
+            <div class="stats-bar">
+                <div class="stat-badge streak" title="Sequência de dias">
+                    🔥 <span id="stat-streak">0</span>
+                </div>
+                <div class="stat-badge xp" title="Pontos de Experiência">
+                    ⚡ <span id="stat-xp">0</span> XP
+                </div>
+                <div class="stat-badge level" title="Seu Nível Atual">
+                    🏆 Nível <span id="stat-user-lvl">1</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <section id="view-learn" class="view active">
+            <h1 class="section-title">Aprender Inglês</h1>
+            <p class="section-desc">Escolha um nível e tema para iniciar seus estudos pedagógicos.</p>
+
+            <h2 style="font-size: 1.1rem; margin-bottom: 12px;">1. Selecione o Nível Pedagógico</h2>
+            <div class="level-grid" id="level-selector">
+                <!-- Levels populated dynamically -->
+            </div>
+
+            <h2 style="font-size: 1.1rem; margin-bottom: 12px;">2. Selecione o Tema</h2>
+            <div class="theme-grid" id="theme-selector">
+                <!-- Themes populated dynamically -->
+            </div>
+
+            <button class="btn btn-primary btn-full" style="padding: 16px; font-size: 1.1rem;" onclick="startLesson()">
+                🚀 Iniciar Lição
+            </button>
+        </section>
+
+        <section id="view-lessons" class="view">
+            <h1 class="section-title">Lições por Tópico</h1>
+            <p class="section-desc">Explore o vocabulário organizado por tema antes de praticar. Toque em um tópico para ver as palavras.</p>
+
+            <div class="card" style="margin-bottom: 20px; border-left: 4px solid var(--primary);">
+                <h3 style="font-size: 0.95rem; margin-bottom: 6px;">📘 Material Complementar — Workbook W2</h3>
+                <p style="font-size: 0.85rem; color: var(--text-muted);">
+                    Os cadernos de atividades <b>"W2_aluno_novo.pdf"</b> e <b>"Workbook_W2_novo-_Atividades_backup.pdf"</b>
+                    foram anexados junto com este aplicativo na conversa. Baixe-os para praticar por escrito ao lado das lições abaixo.
+                </p>
+            </div>
+
+            <div class="theme-grid" id="lessons-topic-grid">
+                <!-- Topics populated dynamically -->
+            </div>
+
+            <div id="lessons-detail" style="display: none;">
+                <!-- Topic detail populated dynamically -->
+            </div>
+        </section>
+
+        <section id="view-practice" class="view">
+            <div class="exercise-container">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                    <button class="btn btn-secondary" style="padding: 6px 12px; font-size: 0.85rem;" onclick="exitLesson()">✕ Sair</button>
+                    <span id="quiz-counter" style="font-weight: 700; color: var(--text-muted);">Exercício 1/10</span>
+                </div>
+                
+                <div class="quiz-progress-bar">
+                    <div id="quiz-progress" class="quiz-progress-fill"></div>
+                </div>
+
+                <div id="quiz-card" class="card">
+                    <!-- Exercise content injected dynamically -->
+                </div>
+
+                <div id="feedback-sheet" class="feedback-sheet">
+                    <div id="feedback-title" style="font-weight: 800; font-size: 1.1rem; margin-bottom: 4px;"></div>
+                    <div id="feedback-detail" style="font-size: 0.9rem;"></div>
+                </div>
+
+                <div style="margin-top: 16px;">
+                    <button id="btn-check" class="btn btn-primary btn-full" onclick="checkAnswer()">Verificar Resposta</button>
+                    <button id="btn-next" class="btn btn-success btn-full" style="display: none;" onclick="nextQuestion()">Próximo Exercício ➔</button>
+                </div>
+            </div>
+        </section>
+
+        <section id="view-dialogue" class="view">
+            <h1 class="section-title">Diálogos Interativos</h1>
+            <p class="section-desc">Pratique conversação real em situações do dia a dia em inglês.</p>
+
+            <div class="card">
+                <label style="font-size: 0.85rem; font-weight: 700; color: var(--text-muted); display: block; margin-bottom: 6px;">Escolha o Cenário:</label>
+                <select id="dialogue-scenario-select" class="text-input" style="margin-bottom: 16px;" onchange="loadDialogueScenario()">
+                    <option value="cafe">☕ At the Café (No Café)</option>
+                    <option value="direction">🗺️ Asking for Directions (Pedindo Direções)</option>
+                    <option value="hotel">🏨 At the Hotel Front Desk (No Hotel)</option>
+                    <option value="smalltalk">👋 Meeting Someone (Conhecendo alguém)</option>
+                    <option value="restaurant">🍽️ At the Restaurant (No Restaurante)</option>
+                    <option value="shopping">🛍️ Shopping for Clothes (Comprando roupas)</option>
+                    <option value="supermarket">🛒 At the Supermarket (No Supermercado)</option>
+                    <option value="taxi">🚕 Taking a Taxi (De táxi)</option>
+                    <option value="airport">✈️ At the Airport (No Aeroporto)</option>
+                    <option value="doctor">🩺 At the Doctor (No Médico)</option>
+                    <option value="phone">📞 On the Phone (Ao Telefone)</option>
+                    <option value="work">💼 At Work (No Trabalho)</option>
+                </select>
+
+                <div id="chat-box" class="chat-container">
+                    <!-- Chat history injected here -->
+                </div>
+
+                <div class="speech-box" style="padding: 16px; margin-bottom: 0;">
+                    <p style="font-size: 0.9rem; font-weight: 700; margin-bottom: 8px;">Sua vez de falar:</p>
+                    <p id="target-phrase" style="font-weight: 800; color: var(--primary); margin-bottom: 12px; font-size: 1.05rem;">"..."</p>
+                    <button id="btn-mic-dialogue" class="mic-btn" onclick="toggleDialogueSpeech()">🎙️</button>
+                    <p id="speech-status-dialogue" style="font-size: 0.85rem; color: var(--text-muted);">Clique para falar em inglês</p>
+                    <p id="recognized-text-dialogue" style="font-size: 0.9rem; font-weight: 600; margin-top: 8px; color: var(--text-main);"></p>
+                    <div class="disclaimer-banner">
+                        ℹ️ <b>Nota Educativa:</b> O reconhecimento de voz utiliza inteligência de fala nativa do navegador. A precisão exibida reflete a similaridade do texto transcrito.
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="view-video" class="view">
+            <h1 class="section-title">🎬 Encontrar Frase em Vídeos Reais</h1>
+            <p class="section-desc">Digite qualquer frase ou expressão em inglês para que o aplicativo encontre um vídeo nativo (YouTube) onde ela é utilizada na prática.</p>
+
+            <div class="card" style="border-left: 4px solid var(--primary);">
+                <label style="font-size: 0.85rem; font-weight: 700; color: var(--text-muted); display: block; margin-bottom: 6px;">Frase ou expressão em inglês:</label>
+                <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+                    <input type="text" id="pron-input" class="text-input" placeholder="Ex: thank you" onkeypress="if(event.key==='Enter'){ checkPronunciation(); }">
+                    <button class="btn btn-primary" style="white-space: nowrap;" onclick="checkPronunciation()">🔍 Encontrar vídeo</button>
+                </div>
+                <div style="font-size: 0.8rem; color: var(--text-muted);">
+                    Exemplos populares:
+                    <a href="#" onclick="event.preventDefault(); fillAndCheckPronunciation('thank you');" style="color: var(--primary); font-weight: 600;">"thank you"</a>,
+                    <a href="#" onclick="event.preventDefault(); fillAndCheckPronunciation('how are you doing');" style="color: var(--primary); font-weight: 600;">"how are you doing?"</a>,
+                    <a href="#" onclick="event.preventDefault(); fillAndCheckPronunciation('what are you doing');" style="color: var(--primary); font-weight: 600;">"what are you doing?"</a>,
+                    <a href="#" onclick="event.preventDefault(); fillAndCheckPronunciation('im tired');" style="color: var(--primary); font-weight: 600;">"I'm tired"</a>
+                </div>
+                <div id="pron-result" style="margin-top: 14px;"></div>
+            </div>
+        </section>
+
+        <section id="view-review" class="view">
+            <h1 class="section-title">Revisão de Erros</h1>
+            <p class="section-desc">Refaça exercícios que você errou anteriormente para fixar o aprendizado.</p>
+
+            <div class="card">
+                <div id="review-summary" style="text-align: center; padding: 20px 0;">
+                    <!-- Review info populated here -->
+                </div>
+            </div>
+        </section>
+
+        <section id="view-profile" class="view">
+            <h1 class="section-title">Seu Desempenho</h1>
+            <p class="section-desc">Acompanhe suas estatísticas, conquistas e evolução em inglês.</p>
+
+            <div class="card" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 16px; text-align: center;">
+                <div>
+                    <div style="font-size: 1.8rem; font-weight: 800; color: var(--primary);" id="prof-total-xp">0</div>
+                    <div style="font-size: 0.8rem; color: var(--text-muted);">Total XP</div>
+                </div>
+                <div>
+                    <div style="font-size: 1.8rem; font-weight: 800; color: var(--success);" id="prof-accuracy">0%</div>
+                    <div style="font-size: 0.8rem; color: var(--text-muted);">Taxa de Acertos</div>
+                </div>
+                <div>
+                    <div style="font-size: 1.8rem; font-weight: 800; color: var(--accent);" id="prof-completed">0</div>
+                    <div style="font-size: 0.8rem; color: var(--text-muted);">Exercícios Concluídos</div>
+                </div>
+            </div>
+
+            <h2 style="font-size: 1.1rem; margin-bottom: 12px;">Conquistas e Medalhas</h2>
+            <div id="badges-container" class="badge-grid">
+                <!-- Badges populated dynamically -->
+            </div>
+
+            <div class="card" style="margin-top: 24px;">
+                <h3 style="font-size: 1rem; margin-bottom: 10px;">Opções de Conta</h3>
+                <button class="btn btn-danger btn-full" onclick="resetProgress()">Zerar Meu Progresso</button>
+            </div>
+        </section>
+    </main>
+
+    <nav class="bottom-nav">
+        <button class="nav-item active" onclick="switchView('learn')" id="nav-learn">
+            <svg viewBox="0 0 24 24"><path d="M12 3L1 9l11 6 9-4.91V17h2V9L12 3zM3.82 9L12 4.54 20.18 9 12 13.46 3.82 9zM5 13.25V17l7 3.82 7-3.82v-3.75l-7 3.82-7-3.82z"/></svg>
+            <span>Aprender</span>
+        </button>
+        <button class="nav-item" onclick="switchView('lessons')" id="nav-lessons">
+            <svg viewBox="0 0 24 24"><path d="M18 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-2 14H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 8H14z"/></svg>
+            <span>Lições</span>
+        </button>
+        <button class="nav-item" onclick="switchView('dialogue')" id="nav-dialogue">
+            <svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM6 9h12v2H6V9zm8 5H6v-2h8v2zm4-6H6V6h12v2z"/></svg>
+            <span>Diálogos</span>
+        </button>
+        <button class="nav-item" onclick="switchView('video')" id="nav-video">
+            <svg viewBox="0 0 24 24"><path d="M18 4l2 4h-3l-2-4h-2l2 4h-3l-2-4H8l2 4H7L5 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2h-2zM4 10h16v8H4v-8z"/></svg>
+            <span>Pronúncia</span>
+        </button>
+        <button class="nav-item" onclick="switchView('review')" id="nav-review">
+            <svg viewBox="0 0 24 24"><path d="M12 5V1L7 6l5 5V7c3.31 0 6 2.69 6 6s-2.69 6-6 6-6-2.69-6-6H4c0 4.42 3.58 8 8 8s8-3.58 8-8-3.58-8-8-8z"/></svg>
+            <span>Erros</span>
+        </button>
+        <button class="nav-item" onclick="switchView('profile')" id="nav-profile">
+            <svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+            <span>Perfil</span>
+        </button>
+    </nav>
+
+    <script>
+        const LEVELS = [
+            { id: 1, name: "Level 1: Words", desc: "Vocabulário essencial e palavras básicas" },
+            { id: 2, name: "Level 2: Basic Sentences", desc: "Frases simples do dia a dia" },
+            { id: 3, name: "Level 3: Questions", desc: "Perguntas e expressões úteis" },
+            { id: 4, name: "Level 4: Grammar", desc: "Estruturas gramaticais e conjugações" },
+            { id: 5, name: "Level 5: Listening & Speaking", desc: "Compreensão auditiva e pronúncia" },
+            { id: 6, name: "Level 6: Writing", desc: "Escrita livre e composição de frases" }
+        ];
+
+        const THEMES = [{"id": "people", "name": "Pessoas e Relações", "icon": "👨‍👩‍👧"}, {"id": "verbs", "name": "Verbos Essenciais", "icon": "🏃"}, {"id": "food", "name": "Comida e Bebida", "icon": "🥐"}, {"id": "home", "name": "Casa e Objetos", "icon": "🏠"}, {"id": "time", "name": "Tempo e Dias", "icon": "⏰"}, {"id": "adjectives", "name": "Adjetivos", "icon": "✨"}, {"id": "emotions", "name": "Emoções", "icon": "😊"}, {"id": "places", "name": "Lugares e Transporte", "icon": "🏙️"}, {"id": "grammar", "name": "Gramática e Conectivos", "icon": "🔗"}, {"id": "daily", "name": "Vida Cotidiana e Tech", "icon": "📱"}];
+
+        // Curated exercises across Levels 2-6, built from the 500-word vocabulary
+        // (people, verbs, food, home, time, adjectives, emotions, places, grammar, daily).
+        const EXERCISES_DB = [
+            // PEOPLE
+            { id: 90, level: 2, theme: "people", type: "order", prompt: "Ordene para: 'My sister is a teacher'", words: ["My","sister","is","a","teacher"], answer: "My sister is a teacher", expl: "My sister is a teacher = Minha irmã é professora." },
+            { id: 91, level: 3, theme: "people", type: "tf", prompt: "'My father is a doctor' significa 'Meu pai é médico'.", answer: "True", expl: "father = pai, doctor = médico." },
+            { id: 92, level: 3, theme: "people", type: "order", prompt: "Ordene para: 'Who is your neighbor?'", words: ["Who","is","your","neighbor","?"], answer: "Who is your neighbor ?", expl: "Who = quem, neighbor = vizinho." },
+
+            // VERBS
+            { id: 93, level: 4, theme: "verbs", type: "mc", prompt: "Qual é a forma correta: 'I ___ coffee every morning' (Eu bebo café toda manhã)", options: ["drink","drinks","drinking","drank"], answer: "drink", expl: "Com o sujeito 'I' usamos a forma base do verbo: drink." },
+            { id: 94, level: 4, theme: "verbs", type: "mc", prompt: "Complete: 'She ___ English every day' (verbo 'estudar')", options: ["studies","study","studying","studied"], answer: "studies", expl: "Com 'he/she/it' adicionamos -s (ou -ies): studies." },
+            { id: 95, level: 2, theme: "verbs", type: "order", prompt: "Ordene para: 'I want to eat'", words: ["I","want","to","eat"], answer: "I want to eat", expl: "want to + verbo = querer fazer algo." },
+            { id: 96, level: 6, theme: "verbs", type: "write", prompt: "Escreva uma frase curta com o verbo 'work' (ex: 'I work every day').", answer: "I work", expl: "Frases com 'work' descrevem trabalho/rotina." },
+
+            // FOOD
+            { id: 97, level: 2, theme: "food", type: "order", prompt: "Ordene para: 'I am hungry'", words: ["I","am","hungry"], answer: "I am hungry", expl: "hungry = com fome." },
+            { id: 98, level: 3, theme: "food", type: "tf", prompt: "'Coffee' significa 'chá' em português.", answer: "False", expl: "Coffee significa café; chá é 'tea'." },
+            { id: 99, level: 3, theme: "food", type: "order", prompt: "Ordene para: 'The soup is delicious'", words: ["The","soup","is","delicious"], answer: "The soup is delicious", expl: "soup = sopa, delicious = delicioso." },
+
+            // HOME
+            { id: 100, level: 2, theme: "home", type: "order", prompt: "Ordene para: 'The key is on the table'", words: ["The","key","is","on","the","table"], answer: "The key is on the table", expl: "key = chave, table = mesa, on = em/sobre." },
+            { id: 101, level: 5, theme: "home", type: "listen", prompt: "Escute o áudio e selecione a palavra correta:", target: "Window", options: ["Window","Wall","Door","Floor"], answer: "Window", expl: "Window = janela." },
+
+            // TIME
+            { id: 102, level: 2, theme: "time", type: "fill", prompt: "Complete a sequência: Monday, ___, Wednesday", options: ["Tuesday","Thursday","Friday","Sunday"], answer: "Tuesday", expl: "A ordem dos dias é Monday, Tuesday, Wednesday..." },
+            { id: 103, level: 4, theme: "time", type: "mc", prompt: "Qual preposição usamos antes de dias da semana? 'I work ___ Monday'", options: ["on","in","at","for"], answer: "on", expl: "Usamos 'on' antes de dias da semana: on Monday." },
+
+            // ADJECTIVES
+            { id: 104, level: 3, theme: "adjectives", type: "tf", prompt: "'Big' é o oposto de 'small'.", answer: "True", expl: "big = grande, small = pequeno, são antônimos." },
+            { id: 105, level: 2, theme: "adjectives", type: "order", prompt: "Ordene para: 'This house is very old'", words: ["This","house","is","very","old"], answer: "This house is very old", expl: "very = muito, old = velho/antigo." },
+
+            // EMOTIONS
+            { id: 106, level: 5, theme: "emotions", type: "speech", prompt: "Diga a frase: 'I am happy'", target: "I am happy", expl: "happy = feliz." },
+            { id: 107, level: 2, theme: "emotions", type: "order", prompt: "Ordene para: 'She is worried'", words: ["She","is","worried"], answer: "She is worried", expl: "worried = preocupado(a)." },
+
+            // PLACES
+            { id: 108, level: 3, theme: "places", type: "order", prompt: "Ordene para: 'Where is the hospital?'", words: ["Where","is","the","hospital","?"], answer: "Where is the hospital ?", expl: "Where = onde, hospital = hospital." },
+            { id: 109, level: 2, theme: "places", type: "order", prompt: "Ordene para: 'The bus is near the station'", words: ["The","bus","is","near","the","station"], answer: "The bus is near the station", expl: "near = perto, station = estação." },
+            { id: 110, level: 6, theme: "places", type: "write", prompt: "Escreva uma frase curta descrevendo onde você mora (ex: 'I live in a big city').", answer: "I live in", expl: "Use 'I live in' + lugar para descrever onde mora." },
+
+            // GRAMMAR
+            { id: 111, level: 4, theme: "grammar", type: "mc", prompt: "Qual pronome interrogativo se usa para perguntar sobre lugar?", options: ["Where","What","Who","When"], answer: "Where", expl: "Where = onde." },
+            { id: 112, level: 3, theme: "grammar", type: "mc", prompt: "Complete: '___ is your name?'", options: ["What","Where","Who","Why"], answer: "What", expl: "What is your name? = Qual é o seu nome?" },
+            { id: 113, level: 3, theme: "grammar", type: "order", prompt: "Ordene para: 'What is your name?'", words: ["What","is","your","name","?"], answer: "What is your name ?", expl: "Estrutura básica de pergunta com 'what'." },
+            { id: 114, level: 5, theme: "grammar", type: "listen", prompt: "Escute o áudio e selecione a palavra correta:", target: "Because", options: ["Because","Before","After","Between"], answer: "Because", expl: "Because = porque." },
+
+            // DAILY / TECH
+            { id: 115, level: 4, theme: "daily", type: "mc", prompt: "Escolha a forma correta: 'This is the ___ song I know' (Esta é a melhor música que conheço)", options: ["best","better","good","bad"], answer: "best", expl: "best = melhor (superlativo)." },
+            { id: 116, level: 6, theme: "daily", type: "write", prompt: "Escreva uma frase apresentando-se em inglês (ex: 'My name is ...').", answer: "My name is", expl: "Frases de apresentação usam 'My name is' + nome." }
+        ];
+
+        // Vocabulary bank organized by topic (500 words) — powers both the "Lições"
+        // tab (reference/flashcard list) and the automatically generated themed
+        // exercises below, so quiz questions are always about real, correctly
+        // translated words from the vocabulary list.
+        const LESSONS_DATA = {"people": [{"en": "I", "pt": "eu", "pron": "ai", "ex": "I am a student."}, {"en": "you", "pt": "você", "pron": "iú", "ex": "You are my friend."}, {"en": "he", "pt": "ele", "pron": "rí", "ex": "He is at home."}, {"en": "she", "pt": "ela", "pron": "xí", "ex": "She is very happy."}, {"en": "it", "pt": "isso", "pron": "it", "ex": "It is on the table."}, {"en": "we", "pt": "nós", "pron": "uí", "ex": "We are here now."}, {"en": "they", "pt": "eles/elas", "pron": "dêi", "ex": "They live in the city."}, {"en": "me", "pt": "me/mim", "pron": "mí", "ex": "Call me later."}, {"en": "him", "pt": "ele", "pron": "rim", "ex": "I see him every day."}, {"en": "her", "pt": "ela", "pron": "rêr", "ex": "I know her well."}, {"en": "us", "pt": "nós", "pron": "âs", "ex": "Come with us."}, {"en": "them", "pt": "eles/elas", "pron": "dêm", "ex": "I talk to them often."}, {"en": "my", "pt": "meu/minha", "pron": "mái", "ex": "This is my book."}, {"en": "your", "pt": "seu/sua", "pron": "iór", "ex": "What is your name?"}, {"en": "his", "pt": "dele", "pron": "riz", "ex": "This is his house."}, {"en": "our", "pt": "nosso/nossa", "pron": "áuer", "ex": "This is our family."}, {"en": "their", "pt": "deles/delas", "pron": "dér", "ex": "This is their home."}, {"en": "mine", "pt": "meu/minha", "pron": "máin", "ex": "This book is mine."}, {"en": "yours", "pt": "seu/sua", "pron": "iórz", "ex": "This bag is yours."}, {"en": "someone", "pt": "alguém", "pron": "sâm-uân", "ex": "Someone is at the door."}, {"en": "everyone", "pt": "todos", "pron": "évri-uân", "ex": "Everyone is happy today."}, {"en": "people", "pt": "pessoas", "pron": "pípol", "ex": "This is my people."}, {"en": "person", "pt": "pessoa", "pron": "pârson", "ex": "This is my person."}, {"en": "man", "pt": "homem", "pron": "mén", "ex": "This is my man."}, {"en": "woman", "pt": "mulher", "pron": "uúman", "ex": "This is my woman."}, {"en": "boy", "pt": "menino", "pron": "bói", "ex": "This is my boy."}, {"en": "girl", "pt": "menina", "pron": "gârl", "ex": "This is my girl."}, {"en": "child", "pt": "criança", "pron": "tcháild", "ex": "This is my child."}, {"en": "baby", "pt": "bebê", "pron": "bêibi", "ex": "This is my baby."}, {"en": "friend", "pt": "amigo", "pron": "frênd", "ex": "This is my friend."}, {"en": "family", "pt": "família", "pron": "fémili", "ex": "This is my family."}, {"en": "mother", "pt": "mãe", "pron": "mâder", "ex": "This is my mother."}, {"en": "father", "pt": "pai", "pron": "fáder", "ex": "This is my father."}, {"en": "mom", "pt": "mãe", "pron": "móm", "ex": "This is my mom."}, {"en": "dad", "pt": "pai", "pron": "déd", "ex": "This is my dad."}, {"en": "brother", "pt": "irmão", "pron": "brâder", "ex": "This is my brother."}, {"en": "sister", "pt": "irmã", "pron": "síster", "ex": "This is my sister."}, {"en": "husband", "pt": "marido", "pron": "râzband", "ex": "This is my husband."}, {"en": "wife", "pt": "esposa", "pron": "uáif", "ex": "This is my wife."}, {"en": "boyfriend", "pt": "namorado", "pron": "bói-frênd", "ex": "This is my boyfriend."}, {"en": "girlfriend", "pt": "namorada", "pron": "gârl-frênd", "ex": "This is my girlfriend."}, {"en": "son", "pt": "filho", "pron": "sân", "ex": "This is my son."}, {"en": "daughter", "pt": "filha", "pron": "dóter", "ex": "This is my daughter."}, {"en": "parent", "pt": "pai/mãe", "pron": "pérent", "ex": "This is my parent."}, {"en": "teacher", "pt": "professor", "pron": "títcher", "ex": "This is my teacher."}, {"en": "student", "pt": "estudante", "pron": "stúdent", "ex": "This is my student."}, {"en": "doctor", "pt": "médico", "pron": "dóctor", "ex": "This is my doctor."}, {"en": "boss", "pt": "chefe", "pron": "bós", "ex": "This is my boss."}, {"en": "neighbor", "pt": "vizinho", "pron": "nêibor", "ex": "This is my neighbor."}, {"en": "customer", "pt": "cliente", "pron": "câstomer", "ex": "This is my customer."}], "verbs": [{"en": "be", "pt": "ser/estar", "pron": "bí", "ex": "I want to be happy."}, {"en": "have", "pt": "ter", "pron": "rév", "ex": "I like to have breakfast."}, {"en": "do", "pt": "fazer", "pron": "dú", "ex": "I like to do my best."}, {"en": "go", "pt": "ir", "pron": "gôu", "ex": "I like to go."}, {"en": "come", "pt": "vir", "pron": "câm", "ex": "I like to come."}, {"en": "want", "pt": "querer", "pron": "uânt", "ex": "I like to want."}, {"en": "need", "pt": "precisar", "pron": "níid", "ex": "I like to need."}, {"en": "like", "pt": "gostar", "pron": "láik", "ex": "I like to like."}, {"en": "love", "pt": "amar", "pron": "lâv", "ex": "I like to love."}, {"en": "prefer", "pt": "preferir", "pron": "prifâr", "ex": "I like to prefer."}, {"en": "eat", "pt": "comer", "pron": "ít", "ex": "I like to eat."}, {"en": "drink", "pt": "beber", "pron": "drínk", "ex": "I like to drink."}, {"en": "make", "pt": "fazer/criar", "pron": "mêik", "ex": "I like to make."}, {"en": "take", "pt": "pegar/levar", "pron": "têik", "ex": "I like to take."}, {"en": "give", "pt": "dar", "pron": "guív", "ex": "I like to give."}, {"en": "get", "pt": "conseguir/pegar", "pron": "guét", "ex": "I like to get."}, {"en": "know", "pt": "saber/conhecer", "pron": "nôu", "ex": "I like to know."}, {"en": "think", "pt": "pensar", "pron": "thínk", "ex": "I like to think."}, {"en": "see", "pt": "ver", "pron": "sí", "ex": "I like to see."}, {"en": "look", "pt": "olhar", "pron": "lúk", "ex": "I like to look."}, {"en": "say", "pt": "dizer", "pron": "sêi", "ex": "I like to say."}, {"en": "tell", "pt": "contar/dizer", "pron": "tél", "ex": "I like to tell."}, {"en": "speak", "pt": "falar", "pron": "spík", "ex": "I like to speak."}, {"en": "talk", "pt": "conversar", "pron": "tók", "ex": "I like to talk."}, {"en": "listen", "pt": "escutar", "pron": "lísen", "ex": "I like to listen."}, {"en": "hear", "pt": "ouvir", "pron": "rír", "ex": "I like to hear."}, {"en": "read", "pt": "ler", "pron": "ríd", "ex": "I like to read."}, {"en": "write", "pt": "escrever", "pron": "ráit", "ex": "I like to write."}, {"en": "learn", "pt": "aprender", "pron": "lârn", "ex": "I like to learn."}, {"en": "study", "pt": "estudar", "pron": "stâdi", "ex": "I like to study."}, {"en": "work", "pt": "trabalhar", "pron": "uârk", "ex": "I like to work."}, {"en": "live", "pt": "morar/viver", "pron": "lív", "ex": "I like to live."}, {"en": "sleep", "pt": "dormir", "pron": "slíip", "ex": "I like to sleep."}, {"en": "wake", "pt": "acordar", "pron": "uêik", "ex": "I like to wake."}, {"en": "open", "pt": "abrir", "pron": "ôupen", "ex": "I like to open."}, {"en": "close", "pt": "fechar", "pron": "clôuz", "ex": "I like to close."}, {"en": "start", "pt": "começar", "pron": "stárt", "ex": "I like to start."}, {"en": "stop", "pt": "parar", "pron": "stóp", "ex": "I like to stop."}, {"en": "try", "pt": "tentar", "pron": "trái", "ex": "I like to try."}, {"en": "help", "pt": "ajudar", "pron": "rélp", "ex": "I like to help."}, {"en": "use", "pt": "usar", "pron": "iúz", "ex": "I like to use."}, {"en": "find", "pt": "encontrar", "pron": "fáind", "ex": "I like to find."}, {"en": "ask", "pt": "perguntar", "pron": "ésk", "ex": "I like to ask."}, {"en": "answer", "pt": "responder", "pron": "énser", "ex": "I like to answer."}, {"en": "call", "pt": "ligar/chamar", "pron": "cól", "ex": "I like to call."}, {"en": "wait", "pt": "esperar", "pron": "uêit", "ex": "I like to wait."}, {"en": "buy", "pt": "comprar", "pron": "bái", "ex": "I like to buy."}, {"en": "pay", "pt": "pagar", "pron": "pêi", "ex": "I like to pay."}, {"en": "sell", "pt": "vender", "pron": "sél", "ex": "I like to sell."}, {"en": "bring", "pt": "trazer", "pron": "bríng", "ex": "I like to bring."}, {"en": "put", "pt": "colocar", "pron": "pút", "ex": "I like to put."}, {"en": "leave", "pt": "sair/deixar", "pron": "lív", "ex": "I like to leave."}, {"en": "stay", "pt": "ficar", "pron": "stêi", "ex": "I like to stay."}, {"en": "walk", "pt": "caminhar", "pron": "uók", "ex": "I like to walk."}, {"en": "run", "pt": "correr", "pron": "rân", "ex": "I like to run."}, {"en": "drive", "pt": "dirigir", "pron": "dráiv", "ex": "I like to drive."}, {"en": "play", "pt": "jogar/brincar", "pron": "plêi", "ex": "I like to play."}, {"en": "watch", "pt": "assistir", "pron": "uótch", "ex": "I like to watch."}, {"en": "cook", "pt": "cozinhar", "pron": "kúk", "ex": "I like to cook."}, {"en": "clean", "pt": "limpar", "pron": "clín", "ex": "I like to clean."}, {"en": "wash", "pt": "lavar", "pron": "uóx", "ex": "I like to wash."}, {"en": "wear", "pt": "vestir/usar", "pron": "uér", "ex": "I like to wear."}, {"en": "remember", "pt": "lembrar", "pron": "rimémber", "ex": "I like to remember."}, {"en": "forget", "pt": "esquecer", "pron": "forgét", "ex": "I like to forget."}, {"en": "understand", "pt": "entender", "pron": "andersténd", "ex": "I like to understand."}, {"en": "believe", "pt": "acreditar", "pron": "bilív", "ex": "I like to believe."}, {"en": "feel", "pt": "sentir", "pron": "fíil", "ex": "I like to feel."}, {"en": "hope", "pt": "esperar/ter esperança", "pron": "rôup", "ex": "I like to hope."}, {"en": "happen", "pt": "acontecer", "pron": "répen", "ex": "I hope it will happen soon."}, {"en": "move", "pt": "mover/mudar", "pron": "múv", "ex": "I like to move."}], "food": [{"en": "food", "pt": "comida", "pron": "fúd", "ex": "I like food."}, {"en": "water", "pt": "água", "pron": "uórer", "ex": "I like water."}, {"en": "coffee", "pt": "café", "pron": "cófi", "ex": "I like coffee."}, {"en": "tea", "pt": "chá", "pron": "tí", "ex": "I like tea."}, {"en": "milk", "pt": "leite", "pron": "mílk", "ex": "I like milk."}, {"en": "juice", "pt": "suco", "pron": "djús", "ex": "I like juice."}, {"en": "bread", "pt": "pão", "pron": "bréd", "ex": "I like bread."}, {"en": "rice", "pt": "arroz", "pron": "ráis", "ex": "I like rice."}, {"en": "meat", "pt": "carne", "pron": "míit", "ex": "I like meat."}, {"en": "chicken", "pt": "frango", "pron": "tchíken", "ex": "I like chicken."}, {"en": "fish", "pt": "peixe", "pron": "físh", "ex": "I like fish."}, {"en": "egg", "pt": "ovo", "pron": "ég", "ex": "I like egg."}, {"en": "cheese", "pt": "queijo", "pron": "tchiíz", "ex": "I like cheese."}, {"en": "fruit", "pt": "fruta", "pron": "frút", "ex": "I like fruit."}, {"en": "vegetable", "pt": "vegetal", "pron": "véjtable", "ex": "I like vegetable."}, {"en": "apple", "pt": "maçã", "pron": "épol", "ex": "I like apple."}, {"en": "banana", "pt": "banana", "pron": "banána", "ex": "I like banana."}, {"en": "orange", "pt": "laranja", "pron": "órendj", "ex": "I like orange."}, {"en": "potato", "pt": "batata", "pron": "potêitou", "ex": "I like potato."}, {"en": "tomato", "pt": "tomate", "pron": "tomêitou", "ex": "I like tomato."}, {"en": "salad", "pt": "salada", "pron": "sélad", "ex": "I like salad."}, {"en": "soup", "pt": "sopa", "pron": "súp", "ex": "I like soup."}, {"en": "cake", "pt": "bolo", "pron": "kêik", "ex": "I like cake."}, {"en": "chocolate", "pt": "chocolate", "pron": "tchóklêt", "ex": "I like chocolate."}, {"en": "sugar", "pt": "açúcar", "pron": "xúgar", "ex": "I like sugar."}, {"en": "salt", "pt": "sal", "pron": "sólt", "ex": "I like salt."}, {"en": "breakfast", "pt": "café da manhã", "pron": "brékfast", "ex": "I like breakfast."}, {"en": "lunch", "pt": "almoço", "pron": "lântch", "ex": "I like lunch."}, {"en": "dinner", "pt": "jantar", "pron": "díner", "ex": "I like dinner."}, {"en": "meal", "pt": "refeição", "pron": "míl", "ex": "I like meal."}, {"en": "restaurant", "pt": "restaurante", "pron": "réstaurant", "ex": "I like restaurant."}, {"en": "menu", "pt": "cardápio", "pron": "méniu", "ex": "I like menu."}, {"en": "plate", "pt": "prato", "pron": "plêit", "ex": "I like plate."}, {"en": "cup", "pt": "xícara", "pron": "câp", "ex": "I like cup."}, {"en": "glass", "pt": "copo", "pron": "glés", "ex": "I like glass."}, {"en": "bottle", "pt": "garrafa", "pron": "bótol", "ex": "I like bottle."}, {"en": "piece", "pt": "pedaço", "pron": "pís", "ex": "I like piece."}, {"en": "slice", "pt": "fatia", "pron": "sláis", "ex": "I like slice."}, {"en": "hungry", "pt": "com fome", "pron": "rângri", "ex": "I like hungry."}, {"en": "thirsty", "pt": "com sede", "pron": "thârsti", "ex": "I like thirsty."}, {"en": "delicious", "pt": "delicioso", "pron": "dilíxâs", "ex": "I like delicious."}, {"en": "sweet", "pt": "doce", "pron": "suíit", "ex": "I like sweet."}, {"en": "hot", "pt": "quente", "pron": "rót", "ex": "I like hot."}, {"en": "cold", "pt": "frio", "pron": "côuld", "ex": "I like cold."}, {"en": "fresh", "pt": "fresco", "pron": "frésh", "ex": "I like fresh."}, {"en": "breakfast", "pt": "café da manhã", "pron": "brékfast", "ex": "I like breakfast."}, {"en": "lunch", "pt": "almoço", "pron": "lântch", "ex": "I like lunch."}, {"en": "dinner", "pt": "jantar", "pron": "díner", "ex": "I like dinner."}, {"en": "drink", "pt": "bebida", "pron": "drínk", "ex": "I like drink."}, {"en": "meal", "pt": "refeição", "pron": "míl", "ex": "I like meal."}], "home": [{"en": "house", "pt": "casa", "pron": "ráus", "ex": "I have a house at home."}, {"en": "home", "pt": "lar/casa", "pron": "rôum", "ex": "I have a home at home."}, {"en": "room", "pt": "cômodo/quarto", "pron": "rúm", "ex": "I have a room at home."}, {"en": "bedroom", "pt": "quarto", "pron": "bédrum", "ex": "I have a bedroom at home."}, {"en": "bathroom", "pt": "banheiro", "pron": "béthrum", "ex": "I have a bathroom at home."}, {"en": "kitchen", "pt": "cozinha", "pron": "kítchen", "ex": "I have a kitchen at home."}, {"en": "living room", "pt": "sala", "pron": "líving rúm", "ex": "I have a living room at home."}, {"en": "door", "pt": "porta", "pron": "dór", "ex": "I have a door at home."}, {"en": "window", "pt": "janela", "pron": "uíndou", "ex": "I have a window at home."}, {"en": "wall", "pt": "parede", "pron": "uól", "ex": "I have a wall at home."}, {"en": "floor", "pt": "chão/andar", "pron": "flór", "ex": "I have a floor at home."}, {"en": "table", "pt": "mesa", "pron": "têibol", "ex": "I have a table at home."}, {"en": "chair", "pt": "cadeira", "pron": "tchéar", "ex": "I have a chair at home."}, {"en": "bed", "pt": "cama", "pron": "béd", "ex": "I have a bed at home."}, {"en": "sofa", "pt": "sofá", "pron": "sôufa", "ex": "I have a sofa at home."}, {"en": "lamp", "pt": "lâmpada", "pron": "lémp", "ex": "I have a lamp at home."}, {"en": "television", "pt": "televisão", "pron": "télevíjan", "ex": "I have a television at home."}, {"en": "phone", "pt": "telefone", "pron": "fôun", "ex": "I have a phone at home."}, {"en": "computer", "pt": "computador", "pron": "compiúter", "ex": "I have a computer at home."}, {"en": "book", "pt": "livro", "pron": "búk", "ex": "I have a book at home."}, {"en": "pen", "pt": "caneta", "pron": "pén", "ex": "I have a pen at home."}, {"en": "pencil", "pt": "lápis", "pron": "pénsil", "ex": "I have a pencil at home."}, {"en": "paper", "pt": "papel", "pron": "pêiper", "ex": "I have a paper at home."}, {"en": "bag", "pt": "bolsa", "pron": "bég", "ex": "I have a bag at home."}, {"en": "key", "pt": "chave", "pron": "kí", "ex": "I have a key at home."}, {"en": "money", "pt": "dinheiro", "pron": "mâni", "ex": "I have a money at home."}, {"en": "clothes", "pt": "roupas", "pron": "clôuz", "ex": "I have a clothes at home."}, {"en": "shoe", "pt": "sapato", "pron": "xú", "ex": "I have a shoe at home."}, {"en": "mirror", "pt": "espelho", "pron": "míror", "ex": "I have a mirror at home."}, {"en": "picture", "pt": "foto/quadro", "pron": "pík-tcher", "ex": "I have a picture at home."}, {"en": "refrigerator", "pt": "geladeira", "pron": "refrídjâreitor", "ex": "I have a refrigerator at home."}, {"en": "oven", "pt": "forno", "pron": "âven", "ex": "I have a oven at home."}, {"en": "shower", "pt": "chuveiro", "pron": "xáuer", "ex": "I have a shower at home."}, {"en": "toilet", "pt": "banheiro/vaso", "pron": "tóilet", "ex": "I have a toilet at home."}, {"en": "towel", "pt": "toalha", "pron": "táuel", "ex": "I have a towel at home."}, {"en": "soap", "pt": "sabonete/sabão", "pron": "sôup", "ex": "I have a soap at home."}, {"en": "pillow", "pt": "travesseiro", "pron": "pílo", "ex": "I have a pillow at home."}, {"en": "blanket", "pt": "cobertor", "pron": "blénkit", "ex": "I have a blanket at home."}, {"en": "light", "pt": "luz", "pron": "láit", "ex": "I have a light at home."}, {"en": "clock", "pt": "relógio", "pron": "clók", "ex": "I have a clock at home."}, {"en": "watch", "pt": "relógio de pulso", "pron": "uótch", "ex": "I have a watch at home."}, {"en": "box", "pt": "caixa", "pron": "bóks", "ex": "I have a box at home."}, {"en": "thing", "pt": "coisa", "pron": "thíng", "ex": "I have a thing at home."}, {"en": "stuff", "pt": "coisas", "pron": "stâf", "ex": "I have a stuff at home."}, {"en": "place", "pt": "lugar", "pron": "plêis", "ex": "I have a place at home."}, {"en": "part", "pt": "parte", "pron": "párt", "ex": "I have a part at home."}, {"en": "side", "pt": "lado", "pron": "sáid", "ex": "I have a side at home."}, {"en": "garden", "pt": "jardim", "pron": "gárden", "ex": "I have a garden at home."}, {"en": "kitchen", "pt": "cozinha", "pron": "kítchen", "ex": "I have a kitchen at home."}, {"en": "apartment", "pt": "apartamento", "pron": "apártment", "ex": "I have a apartment at home."}], "time": [{"en": "time", "pt": "tempo/hora", "pron": "táim", "ex": "I think about time a lot."}, {"en": "day", "pt": "dia", "pron": "dêi", "ex": "I think about day a lot."}, {"en": "week", "pt": "semana", "pron": "uík", "ex": "I think about week a lot."}, {"en": "month", "pt": "mês", "pron": "mânth", "ex": "I think about month a lot."}, {"en": "year", "pt": "ano", "pron": "iír", "ex": "I think about year a lot."}, {"en": "today", "pt": "hoje", "pron": "tudêi", "ex": "I think about today a lot."}, {"en": "tomorrow", "pt": "amanhã", "pron": "tumórou", "ex": "I think about tomorrow a lot."}, {"en": "yesterday", "pt": "ontem", "pron": "iésterdêi", "ex": "I think about yesterday a lot."}, {"en": "morning", "pt": "manhã", "pron": "mórning", "ex": "I think about morning a lot."}, {"en": "afternoon", "pt": "tarde", "pron": "áfternún", "ex": "I think about afternoon a lot."}, {"en": "evening", "pt": "noite", "pron": "ívning", "ex": "I think about evening a lot."}, {"en": "night", "pt": "noite", "pron": "náit", "ex": "I think about night a lot."}, {"en": "Monday", "pt": "segunda-feira", "pron": "mândei", "ex": "See you on Monday!"}, {"en": "Tuesday", "pt": "terça-feira", "pron": "túsdei", "ex": "See you on Tuesday!"}, {"en": "Wednesday", "pt": "quarta-feira", "pron": "uénzdei", "ex": "See you on Wednesday!"}, {"en": "Thursday", "pt": "quinta-feira", "pron": "thârzdei", "ex": "See you on Thursday!"}, {"en": "Friday", "pt": "sexta-feira", "pron": "fráidei", "ex": "See you on Friday!"}, {"en": "Saturday", "pt": "sábado", "pron": "sátârdei", "ex": "See you on Saturday!"}, {"en": "Sunday", "pt": "domingo", "pron": "sândei", "ex": "See you on Sunday!"}, {"en": "weekend", "pt": "fim de semana", "pron": "uikénd", "ex": "I think about weekend a lot."}, {"en": "minute", "pt": "minuto", "pron": "mínit", "ex": "I think about minute a lot."}, {"en": "hour", "pt": "hora", "pron": "áuer", "ex": "I think about hour a lot."}, {"en": "second", "pt": "segundo", "pron": "sékând", "ex": "I think about second a lot."}, {"en": "early", "pt": "cedo", "pron": "ârli", "ex": "I think about early a lot."}, {"en": "late", "pt": "tarde/atrasado", "pron": "lêit", "ex": "I think about late a lot."}, {"en": "now", "pt": "agora", "pron": "náu", "ex": "I think about now a lot."}, {"en": "soon", "pt": "em breve", "pron": "sún", "ex": "I think about soon a lot."}, {"en": "later", "pt": "mais tarde", "pron": "lêiter", "ex": "I think about later a lot."}, {"en": "before", "pt": "antes", "pron": "bifór", "ex": "I think about before a lot."}, {"en": "after", "pt": "depois", "pron": "áfter", "ex": "I think about after a lot."}, {"en": "always", "pt": "sempre", "pron": "ólueiz", "ex": "I think about always a lot."}, {"en": "never", "pt": "nunca", "pron": "néver", "ex": "I think about never a lot."}, {"en": "sometimes", "pt": "às vezes", "pron": "sâmtáimz", "ex": "I think about sometimes a lot."}, {"en": "usually", "pt": "geralmente", "pron": "iújuali", "ex": "I think about usually a lot."}, {"en": "often", "pt": "frequentemente", "pron": "ófen", "ex": "I think about often a lot."}, {"en": "again", "pt": "novamente", "pron": "aguen", "ex": "I think about again a lot."}, {"en": "already", "pt": "já", "pron": "ólrédi", "ex": "I think about already a lot."}, {"en": "still", "pt": "ainda", "pron": "stíl", "ex": "I think about still a lot."}, {"en": "first", "pt": "primeiro", "pron": "fârst", "ex": "I think about first a lot."}, {"en": "last", "pt": "último", "pron": "lést", "ex": "I think about last a lot."}, {"en": "next", "pt": "próximo", "pron": "nékst", "ex": "I think about next a lot."}, {"en": "every", "pt": "cada/todo", "pron": "évri", "ex": "I think about every a lot."}, {"en": "daily", "pt": "diariamente", "pron": "dêili", "ex": "I think about daily a lot."}, {"en": "weekly", "pt": "semanalmente", "pron": "uíkli", "ex": "I think about weekly a lot."}, {"en": "monthly", "pt": "mensalmente", "pron": "mânthli", "ex": "I think about monthly a lot."}, {"en": "yearly", "pt": "anualmente", "pron": "iírli", "ex": "I think about yearly a lot."}, {"en": "beginning", "pt": "começo", "pron": "bigíning", "ex": "I think about beginning a lot."}, {"en": "end", "pt": "fim", "pron": "énd", "ex": "I think about end a lot."}, {"en": "moment", "pt": "momento", "pron": "môument", "ex": "I think about moment a lot."}, {"en": "period", "pt": "período", "pron": "píriod", "ex": "I think about period a lot."}], "adjectives": [{"en": "good", "pt": "bom", "pron": "gud", "ex": "This is very good."}, {"en": "bad", "pt": "ruim", "pron": "béd", "ex": "This is very bad."}, {"en": "big", "pt": "grande", "pron": "big", "ex": "This is very big."}, {"en": "small", "pt": "pequeno", "pron": "smól", "ex": "This is very small."}, {"en": "beautiful", "pt": "bonito", "pron": "biútifol", "ex": "This is very beautiful."}, {"en": "ugly", "pt": "feio", "pron": "âgli", "ex": "This is very ugly."}, {"en": "easy", "pt": "fácil", "pron": "ízi", "ex": "This is very easy."}, {"en": "difficult", "pt": "difícil", "pron": "dífikâlt", "ex": "This is very difficult."}, {"en": "happy", "pt": "feliz", "pron": "répi", "ex": "This is very happy."}, {"en": "sad", "pt": "triste", "pron": "séd", "ex": "This is very sad."}, {"en": "tired", "pt": "cansado", "pron": "táiârd", "ex": "This is very tired."}, {"en": "sick", "pt": "doente", "pron": "sík", "ex": "This is very sick."}, {"en": "healthy", "pt": "saudável", "pron": "rélthi", "ex": "This is very healthy."}, {"en": "young", "pt": "jovem", "pron": "iâng", "ex": "This is very young."}, {"en": "old", "pt": "velho/antigo", "pron": "ôuld", "ex": "This is very old."}, {"en": "new", "pt": "novo", "pron": "niú", "ex": "This is very new."}, {"en": "important", "pt": "importante", "pron": "impórtant", "ex": "This is very important."}, {"en": "different", "pt": "diferente", "pron": "dífrent", "ex": "This is very different."}, {"en": "same", "pt": "mesmo", "pron": "sêim", "ex": "This is very same."}, {"en": "right", "pt": "certo/direita", "pron": "ráit", "ex": "This is very right."}, {"en": "wrong", "pt": "errado", "pron": "róng", "ex": "This is very wrong."}, {"en": "fast", "pt": "rápido", "pron": "fést", "ex": "This is very fast."}, {"en": "slow", "pt": "lento", "pron": "slôu", "ex": "This is very slow."}, {"en": "strong", "pt": "forte", "pron": "stróng", "ex": "This is very strong."}, {"en": "weak", "pt": "fraco", "pron": "uík", "ex": "This is very weak."}, {"en": "rich", "pt": "rico", "pron": "rítch", "ex": "This is very rich."}, {"en": "poor", "pt": "pobre", "pron": "púr", "ex": "This is very poor."}, {"en": "cheap", "pt": "barato", "pron": "tchip", "ex": "This is very cheap."}, {"en": "expensive", "pt": "caro", "pron": "ikspénsiv", "ex": "This is very expensive."}, {"en": "clean", "pt": "limpo", "pron": "clín", "ex": "This is very clean."}, {"en": "dirty", "pt": "sujo", "pron": "dârti", "ex": "This is very dirty."}, {"en": "full", "pt": "cheio", "pron": "ful", "ex": "This is very full."}, {"en": "empty", "pt": "vazio", "pron": "émpti", "ex": "This is very empty."}, {"en": "pretty", "pt": "bonito/lindo", "pron": "príti", "ex": "This is very pretty."}, {"en": "nice", "pt": "legal/agradável", "pron": "náis", "ex": "This is very nice."}, {"en": "kind", "pt": "gentil", "pron": "káind", "ex": "This is very kind."}, {"en": "funny", "pt": "engraçado", "pron": "fãni", "ex": "This is very funny."}, {"en": "serious", "pt": "sério", "pron": "síriâs", "ex": "This is very serious."}, {"en": "busy", "pt": "ocupado", "pron": "bízi", "ex": "This is very busy."}, {"en": "free", "pt": "livre/grátis", "pron": "frí", "ex": "This is very free."}, {"en": "ready", "pt": "pronto", "pron": "rédi", "ex": "This is very ready."}, {"en": "sure", "pt": "certo", "pron": "xúr", "ex": "This is very sure."}, {"en": "possible", "pt": "possível", "pron": "póssibol", "ex": "This is very possible."}, {"en": "impossible", "pt": "impossível", "pron": "impóssibol", "ex": "This is very impossible."}, {"en": "special", "pt": "especial", "pron": "spéxol", "ex": "This is very special."}, {"en": "easy", "pt": "fácil", "pron": "ízi", "ex": "This is very easy."}, {"en": "hard", "pt": "difícil/duro", "pron": "rárd", "ex": "This is very hard."}, {"en": "important", "pt": "importante", "pron": "impórtant", "ex": "This is very important."}, {"en": "wonderful", "pt": "maravilhoso", "pron": "uânderfol", "ex": "This is very wonderful."}, {"en": "favorite", "pt": "favorito", "pron": "fêivorit", "ex": "This is very favorite."}], "emotions": [{"en": "happy", "pt": "feliz", "pron": "répi", "ex": "I am happy today."}, {"en": "sad", "pt": "triste", "pron": "séd", "ex": "I am sad today."}, {"en": "angry", "pt": "bravo", "pron": "éngri", "ex": "I am angry today."}, {"en": "afraid", "pt": "com medo", "pron": "afrêid", "ex": "I am afraid today."}, {"en": "scared", "pt": "assustado", "pron": "skérd", "ex": "I am scared today."}, {"en": "worried", "pt": "preocupado", "pron": "uârid", "ex": "I am worried today."}, {"en": "nervous", "pt": "nervoso", "pron": "nârvas", "ex": "I am nervous today."}, {"en": "excited", "pt": "animado", "pron": "iksáited", "ex": "I am excited today."}, {"en": "bored", "pt": "entediado", "pron": "bórd", "ex": "I am bored today."}, {"en": "surprised", "pt": "surpreso", "pron": "surpráizd", "ex": "I am surprised today."}, {"en": "confused", "pt": "confuso", "pron": "confiúzd", "ex": "I am confused today."}, {"en": "calm", "pt": "calmo", "pron": "kám", "ex": "I am calm today."}, {"en": "comfortable", "pt": "confortável", "pron": "câmfortabol", "ex": "I am comfortable today."}, {"en": "uncomfortable", "pt": "desconfortável", "pron": "ancâmfortabol", "ex": "I am uncomfortable today."}, {"en": "love", "pt": "amor", "pron": "lâv", "ex": "I have a big love."}, {"en": "hate", "pt": "ódio/odiar", "pron": "rêit", "ex": "I have a big hate."}, {"en": "fear", "pt": "medo", "pron": "fíar", "ex": "I have a big fear."}, {"en": "hope", "pt": "esperança", "pron": "rôup", "ex": "I have a big hope."}, {"en": "dream", "pt": "sonho", "pron": "drím", "ex": "I have a big dream."}, {"en": "problem", "pt": "problema", "pron": "próblem", "ex": "I have a big problem."}, {"en": "question", "pt": "pergunta", "pron": "kuéstchân", "ex": "I have a big question."}, {"en": "answer", "pt": "resposta", "pron": "énser", "ex": "I have a big answer."}, {"en": "idea", "pt": "ideia", "pron": "aidía", "ex": "I have a big idea."}, {"en": "reason", "pt": "razão", "pron": "rízan", "ex": "I have a big reason."}, {"en": "feeling", "pt": "sentimento", "pron": "fíling", "ex": "I have a big feeling."}, {"en": "happiness", "pt": "felicidade", "pron": "répinês", "ex": "I have a big happiness."}, {"en": "sadness", "pt": "tristeza", "pron": "sédnês", "ex": "I have a big sadness."}, {"en": "stress", "pt": "estresse", "pron": "strés", "ex": "I have a big stress."}, {"en": "fun", "pt": "diversão", "pron": "fãn", "ex": "I have a big fun."}, {"en": "surprise", "pt": "surpresa", "pron": "surpráiz", "ex": "I have a big surprise."}, {"en": "smile", "pt": "sorriso", "pron": "smáil", "ex": "I have a big smile."}, {"en": "laugh", "pt": "rir", "pron": "léf", "ex": "I want to laugh."}, {"en": "cry", "pt": "chorar", "pron": "crái", "ex": "I want to cry."}, {"en": "worry", "pt": "preocupação", "pron": "uâri", "ex": "I have a big worry."}, {"en": "angry", "pt": "bravo", "pron": "éngri", "ex": "I am angry today."}, {"en": "lonely", "pt": "solitário", "pron": "lôunli", "ex": "I am lonely today."}, {"en": "comfortable", "pt": "confortável", "pron": "câmfortabol", "ex": "I am comfortable today."}, {"en": "proud", "pt": "orgulhoso", "pron": "práud", "ex": "I am proud today."}, {"en": "afraid", "pt": "com medo", "pron": "afrêid", "ex": "I am afraid today."}, {"en": "excited", "pt": "animado", "pron": "iksáited", "ex": "I am excited today."}], "places": [{"en": "city", "pt": "cidade", "pron": "síti", "ex": "I am going to the city."}, {"en": "country", "pt": "país", "pron": "cântri", "ex": "I am going to the country."}, {"en": "street", "pt": "rua", "pron": "strít", "ex": "I am going to the street."}, {"en": "school", "pt": "escola", "pron": "skúul", "ex": "I am going to the school."}, {"en": "college", "pt": "faculdade", "pron": "cólidj", "ex": "I am going to the college."}, {"en": "university", "pt": "universidade", "pron": "iunivârsiti", "ex": "I am going to the university."}, {"en": "office", "pt": "escritório", "pron": "ófis", "ex": "I am going to the office."}, {"en": "store", "pt": "loja", "pron": "stór", "ex": "I am going to the store."}, {"en": "market", "pt": "mercado", "pron": "márkit", "ex": "I am going to the market."}, {"en": "bank", "pt": "banco", "pron": "béank", "ex": "I am going to the bank."}, {"en": "hospital", "pt": "hospital", "pron": "róspital", "ex": "I am going to the hospital."}, {"en": "pharmacy", "pt": "farmácia", "pron": "fármasi", "ex": "I am going to the pharmacy."}, {"en": "park", "pt": "parque", "pron": "párk", "ex": "I am going to the park."}, {"en": "beach", "pt": "praia", "pron": "bíitch", "ex": "I am going to the beach."}, {"en": "airport", "pt": "aeroporto", "pron": "érport", "ex": "I am going to the airport."}, {"en": "hotel", "pt": "hotel", "pron": "routél", "ex": "I am going to the hotel."}, {"en": "station", "pt": "estação", "pron": "stêixon", "ex": "I am going to the station."}, {"en": "bus", "pt": "ônibus", "pron": "bâs", "ex": "I am going to the bus."}, {"en": "train", "pt": "trem", "pron": "trêin", "ex": "I am going to the train."}, {"en": "subway", "pt": "metrô", "pron": "sâbuei", "ex": "I am going to the subway."}, {"en": "car", "pt": "carro", "pron": "kár", "ex": "I am going to the car."}, {"en": "taxi", "pt": "táxi", "pron": "téksi", "ex": "I am going to the taxi."}, {"en": "bicycle", "pt": "bicicleta", "pron": "báissikol", "ex": "I am going to the bicycle."}, {"en": "motorcycle", "pt": "motocicleta", "pron": "môutorsáikol", "ex": "I am going to the motorcycle."}, {"en": "plane", "pt": "avião", "pron": "plêin", "ex": "I am going to the plane."}, {"en": "ticket", "pt": "passagem/ingresso", "pron": "tíkit", "ex": "I am going to the ticket."}, {"en": "road", "pt": "estrada", "pron": "rôud", "ex": "I am going to the road."}, {"en": "map", "pt": "mapa", "pron": "mép", "ex": "I am going to the map."}, {"en": "left", "pt": "esquerda", "pron": "léft", "ex": "Turn left."}, {"en": "right", "pt": "direita", "pron": "ráit", "ex": "Turn right."}, {"en": "straight", "pt": "reto", "pron": "strêit", "ex": "Turn straight."}, {"en": "near", "pt": "perto", "pron": "níar", "ex": "It is near from here."}, {"en": "far", "pt": "longe", "pron": "fáar", "ex": "It is far from here."}, {"en": "here", "pt": "aqui", "pron": "ríar", "ex": "It is here from here."}, {"en": "there", "pt": "ali/lá", "pron": "dér", "ex": "It is there from here."}, {"en": "inside", "pt": "dentro", "pron": "insáid", "ex": "It is inside from here."}, {"en": "outside", "pt": "fora", "pron": "autsáid", "ex": "It is outside from here."}, {"en": "entrance", "pt": "entrada", "pron": "éntrâns", "ex": "I am going to the entrance."}, {"en": "exit", "pt": "saída", "pron": "égz-it", "ex": "I am going to the exit."}, {"en": "address", "pt": "endereço", "pron": "édrés", "ex": "I am going to the address."}], "grammar": [{"en": "what", "pt": "o que/qual", "pron": "uót", "ex": "(what)"}, {"en": "who", "pt": "quem", "pron": "rú", "ex": "(who)"}, {"en": "where", "pt": "onde", "pron": "uér", "ex": "(where)"}, {"en": "when", "pt": "quando", "pron": "uén", "ex": "(when)"}, {"en": "why", "pt": "por quê", "pron": "uái", "ex": "(why)"}, {"en": "how", "pt": "como", "pron": "ráu", "ex": "(how)"}, {"en": "which", "pt": "qual", "pron": "uítch", "ex": "(which)"}, {"en": "because", "pt": "porque", "pron": "bicóz", "ex": "(because)"}, {"en": "and", "pt": "e", "pron": "énd", "ex": "(and)"}, {"en": "but", "pt": "mas", "pron": "bât", "ex": "(but)"}, {"en": "or", "pt": "ou", "pron": "ór", "ex": "(or)"}, {"en": "so", "pt": "então", "pron": "sôu", "ex": "(so)"}, {"en": "if", "pt": "se", "pron": "if", "ex": "(if)"}, {"en": "than", "pt": "do que", "pron": "dén", "ex": "(than)"}, {"en": "with", "pt": "com", "pron": "uíth", "ex": "(with)"}, {"en": "without", "pt": "sem", "pron": "uitháut", "ex": "(without)"}, {"en": "for", "pt": "para/por", "pron": "fór", "ex": "(for)"}, {"en": "from", "pt": "de", "pron": "frâm", "ex": "(from)"}, {"en": "to", "pt": "para", "pron": "tú", "ex": "(to)"}, {"en": "in", "pt": "em/dentro", "pron": "in", "ex": "(in)"}, {"en": "on", "pt": "em/sobre", "pron": "ón", "ex": "(on)"}, {"en": "at", "pt": "em", "pron": "ét", "ex": "(at)"}, {"en": "under", "pt": "embaixo", "pron": "ânder", "ex": "(under)"}, {"en": "over", "pt": "acima", "pron": "ôuver", "ex": "(over)"}, {"en": "between", "pt": "entre", "pron": "bituín", "ex": "(between)"}, {"en": "about", "pt": "sobre", "pron": "abáut", "ex": "(about)"}, {"en": "before", "pt": "antes", "pron": "bifór", "ex": "(before)"}, {"en": "after", "pt": "depois", "pron": "áfter", "ex": "(after)"}, {"en": "very", "pt": "muito", "pron": "véri", "ex": "(very)"}, {"en": "really", "pt": "realmente", "pron": "ríli", "ex": "(really)"}, {"en": "also", "pt": "também", "pron": "ólsou", "ex": "(also)"}, {"en": "only", "pt": "somente", "pron": "ôunli", "ex": "(only)"}, {"en": "just", "pt": "apenas", "pron": "djâst", "ex": "(just)"}, {"en": "more", "pt": "mais", "pron": "mór", "ex": "(more)"}, {"en": "less", "pt": "menos", "pron": "lés", "ex": "(less)"}, {"en": "much", "pt": "muito", "pron": "mâtch", "ex": "(much)"}, {"en": "many", "pt": "muitos", "pron": "méni", "ex": "(many)"}, {"en": "some", "pt": "alguns", "pron": "sâm", "ex": "(some)"}, {"en": "any", "pt": "algum/qualquer", "pron": "éni", "ex": "(any)"}, {"en": "all", "pt": "todos", "pron": "ól", "ex": "(all)"}, {"en": "every", "pt": "cada/todo", "pron": "évri", "ex": "(every)"}, {"en": "another", "pt": "outro", "pron": "anâder", "ex": "(another)"}, {"en": "enough", "pt": "suficiente", "pron": "inâf", "ex": "(enough)"}, {"en": "too", "pt": "também/demais", "pron": "tú", "ex": "(too)"}, {"en": "maybe", "pt": "talvez", "pron": "mêibi", "ex": "(maybe)"}, {"en": "yes", "pt": "sim", "pron": "iés", "ex": "(yes)"}, {"en": "no", "pt": "não", "pron": "nôu", "ex": "(no)"}, {"en": "not", "pt": "não", "pron": "nát", "ex": "(not)"}, {"en": "here", "pt": "aqui", "pron": "ríar", "ex": "(here)"}, {"en": "there", "pt": "ali/lá", "pron": "dér", "ex": "(there)"}], "daily": [{"en": "thing", "pt": "coisa", "pron": "thíng", "ex": "This is my thing."}, {"en": "life", "pt": "vida", "pron": "láif", "ex": "This is my life."}, {"en": "world", "pt": "mundo", "pron": "uârld", "ex": "This is my world."}, {"en": "way", "pt": "maneira/caminho", "pron": "uêi", "ex": "This is my way."}, {"en": "name", "pt": "nome", "pron": "nêim", "ex": "This is my name."}, {"en": "number", "pt": "número", "pron": "nâmbâr", "ex": "This is my number."}, {"en": "money", "pt": "dinheiro", "pron": "mâni", "ex": "This is my money."}, {"en": "job", "pt": "emprego", "pron": "djób", "ex": "This is my job."}, {"en": "work", "pt": "trabalho", "pron": "uârk", "ex": "This is my work."}, {"en": "school", "pt": "escola", "pron": "skúul", "ex": "This is my school."}, {"en": "home", "pt": "casa/lar", "pron": "rôum", "ex": "This is my home."}, {"en": "place", "pt": "lugar", "pron": "plêis", "ex": "This is my place."}, {"en": "problem", "pt": "problema", "pron": "próblem", "ex": "This is my problem."}, {"en": "question", "pt": "pergunta", "pron": "kuéstchân", "ex": "This is my question."}, {"en": "answer", "pt": "resposta", "pron": "énser", "ex": "This is my answer."}, {"en": "idea", "pt": "ideia", "pron": "aidía", "ex": "This is my idea."}, {"en": "story", "pt": "história", "pron": "stóri", "ex": "This is my story."}, {"en": "word", "pt": "palavra", "pron": "uârd", "ex": "This is my word."}, {"en": "language", "pt": "idioma", "pron": "lénguídj", "ex": "This is my language."}, {"en": "English", "pt": "inglês", "pron": "ínglish", "ex": "This is my English."}, {"en": "Portuguese", "pt": "português", "pron": "pórtchuguíz", "ex": "This is my Portuguese."}, {"en": "internet", "pt": "internet", "pron": "ínternet", "ex": "This is my internet."}, {"en": "computer", "pt": "computador", "pron": "compiúter", "ex": "This is my computer."}, {"en": "email", "pt": "e-mail", "pron": "ímeil", "ex": "This is my email."}, {"en": "message", "pt": "mensagem", "pron": "mésidj", "ex": "This is my message."}, {"en": "photo", "pt": "foto", "pron": "fôutou", "ex": "This is my photo."}, {"en": "music", "pt": "música", "pron": "miúzik", "ex": "This is my music."}, {"en": "movie", "pt": "filme", "pron": "múvi", "ex": "This is my movie."}, {"en": "game", "pt": "jogo", "pron": "gêim", "ex": "This is my game."}, {"en": "book", "pt": "livro", "pron": "búk", "ex": "This is my book."}, {"en": "song", "pt": "música/canção", "pron": "sóng", "ex": "This is my song."}, {"en": "start", "pt": "começo", "pron": "stárt", "ex": "This is my start."}, {"en": "end", "pt": "fim", "pron": "énd", "ex": "This is my end."}, {"en": "first", "pt": "primeiro", "pron": "fârst", "ex": "This is my first."}, {"en": "last", "pt": "último", "pron": "lést", "ex": "This is my last."}, {"en": "next", "pt": "próximo", "pron": "nékst", "ex": "This is my next."}, {"en": "best", "pt": "melhor", "pron": "bést", "ex": "This is my best."}, {"en": "better", "pt": "melhor", "pron": "béter", "ex": "This is my better."}, {"en": "worse", "pt": "pior", "pron": "uârs", "ex": "This is my worse."}, {"en": "important", "pt": "importante", "pron": "impórtant", "ex": "This is my important."}, {"en": "same", "pt": "mesmo", "pron": "sêim", "ex": "This is my same."}, {"en": "different", "pt": "diferente", "pron": "dífrent", "ex": "This is my different."}, {"en": "true", "pt": "verdadeiro", "pron": "trú", "ex": "This is my true."}, {"en": "false", "pt": "falso", "pron": "fólse", "ex": "This is my false."}, {"en": "right", "pt": "certo", "pron": "ráit", "ex": "This is my right."}, {"en": "wrong", "pt": "errado", "pron": "róng", "ex": "This is my wrong."}, {"en": "everything", "pt": "tudo", "pron": "évri-thíng", "ex": "This is my everything."}, {"en": "something", "pt": "alguma coisa", "pron": "sâm-thíng", "ex": "This is my something."}, {"en": "nothing", "pt": "nada", "pron": "nâ-thíng", "ex": "This is my nothing."}, {"en": "anything", "pt": "qualquer coisa", "pron": "éni-thíng", "ex": "This is my anything."}]};
+
+        // Extra vocabulary (merged into the themes above, skipping duplicates). Feeds
+        // exercises, Pronúncia tab and lessons automatically.
+        const EXTRA_WORDS = {
+            people: [
+                {en:"uncle",pt:"tio",pron:"ânkol",ex:"My uncle lives in Texas."},
+                {en:"aunt",pt:"tia",pron:"ént",ex:"My aunt makes great cake."},
+                {en:"cousin",pt:"primo/prima",pron:"câzin",ex:"My cousin is visiting us."},
+                {en:"grandmother",pt:"avó",pron:"grén-mâder",ex:"My grandmother cooks very well."},
+                {en:"grandfather",pt:"avô",pron:"grén-fáder",ex:"My grandfather tells funny stories."},
+                {en:"coworker",pt:"colega de trabalho",pron:"côu-uârker",ex:"My coworker is very kind."},
+                {en:"stranger",pt:"estranho",pron:"strêindjer",ex:"I talked to a stranger today."}
+            ],
+            verbs: [
+                {en:"travel",pt:"viajar",pron:"trávol",ex:"I want to travel next year."},
+                {en:"sing",pt:"cantar",pron:"síng",ex:"She loves to sing in the car."},
+                {en:"dance",pt:"dançar",pron:"déns",ex:"Let's dance tonight!"},
+                {en:"swim",pt:"nadar",pron:"suím",ex:"I swim on Saturdays."},
+                {en:"build",pt:"construir",pron:"bíld",ex:"They build houses."},
+                {en:"choose",pt:"escolher",pron:"tchúz",ex:"Please choose one."},
+                {en:"meet",pt:"encontrar/conhecer",pron:"mít",ex:"Nice to meet you!"},
+                {en:"visit",pt:"visitar",pron:"vízit",ex:"We visit my parents on Sundays."}
+            ],
+            food: [
+                {en:"strawberry",pt:"morango",pron:"strôberi",ex:"I love strawberry juice."},
+                {en:"butter",pt:"manteiga",pron:"bâder",ex:"Can I have some butter?"},
+                {en:"pizza",pt:"pizza",pron:"pítsa",ex:"Let's order a pizza."},
+                {en:"sandwich",pt:"sanduíche",pron:"sénduitch",ex:"I want a chicken sandwich."},
+                {en:"onion",pt:"cebola",pron:"ânion",ex:"I don't like raw onion."},
+                {en:"garlic",pt:"alho",pron:"gárlik",ex:"Add some garlic, please."},
+                {en:"snack",pt:"lanche",pron:"snék",ex:"I'd like a snack."}
+            ],
+            home: [
+                {en:"stairs",pt:"escadas",pron:"stérz",ex:"Take the stairs, please."},
+                {en:"roof",pt:"telhado",pron:"rúf",ex:"The roof is red."},
+                {en:"closet",pt:"armário",pron:"clózet",ex:"My clothes are in the closet."},
+                {en:"curtain",pt:"cortina",pron:"kârten",ex:"Open the curtain, please."},
+                {en:"garage",pt:"garagem",pron:"garáj",ex:"The car is in the garage."},
+                {en:"fence",pt:"cerca",pron:"féns",ex:"We have a white fence."}
+            ],
+            time: [
+                {en:"midnight",pt:"meia-noite",pron:"mídnait",ex:"I go to bed at midnight."},
+                {en:"noon",pt:"meio-dia",pron:"nún",ex:"Lunch is at noon."},
+                {en:"tonight",pt:"hoje à noite",pron:"tunáit",ex:"What are you doing tonight?"},
+                {en:"century",pt:"século",pron:"sén-tchuri",ex:"This is a century-old house."}
+            ],
+            adjectives: [
+                {en:"tall",pt:"alto",pron:"tól",ex:"My brother is very tall."},
+                {en:"short",pt:"baixo/curto",pron:"xórt",ex:"This movie is short."},
+                {en:"thin",pt:"magro/fino",pron:"thín",ex:"The book is thin."},
+                {en:"heavy",pt:"pesado",pron:"révi",ex:"This bag is heavy."},
+                {en:"safe",pt:"seguro",pron:"sêif",ex:"This city is safe."},
+                {en:"dangerous",pt:"perigoso",pron:"dêindjerâs",ex:"That road is dangerous."},
+                {en:"famous",pt:"famoso",pron:"fêimâs",ex:"He is a famous singer."}
+            ],
+            emotions: [
+                {en:"grateful",pt:"grato",pron:"grêitful",ex:"I am grateful for your help."},
+                {en:"jealous",pt:"ciumento",pron:"djélâs",ex:"Don't be jealous."},
+                {en:"embarrassed",pt:"envergonhado",pron:"imbérâst",ex:"I felt embarrassed."},
+                {en:"disappointed",pt:"decepcionado",pron:"dissapóinted",ex:"She was disappointed."},
+                {en:"relieved",pt:"aliviado",pron:"rilívd",ex:"I'm so relieved!"}
+            ],
+            places: [
+                {en:"library",pt:"biblioteca",pron:"láibréri",ex:"I study at the library."},
+                {en:"museum",pt:"museu",pron:"miuzíam",ex:"Let's go to the museum."},
+                {en:"church",pt:"igreja",pron:"tchârtch",ex:"The church is near here."},
+                {en:"bakery",pt:"padaria",pron:"bêikeri",ex:"I buy bread at the bakery."},
+                {en:"supermarket",pt:"supermercado",pron:"súpermárkit",ex:"I go to the supermarket on Fridays."},
+                {en:"gym",pt:"academia",pron:"djím",ex:"I go to the gym every day."},
+                {en:"bridge",pt:"ponte",pron:"brídj",ex:"Cross the bridge."},
+                {en:"village",pt:"vila/aldeia",pron:"vílidj",ex:"They live in a small village."}
+            ],
+            daily: [
+                {en:"weather",pt:"clima/tempo",pron:"uéder",ex:"The weather is nice today."},
+                {en:"shopping",pt:"compras",pron:"xóping",ex:"I like shopping on weekends."},
+                {en:"birthday",pt:"aniversário",pron:"bârthdei",ex:"Today is my birthday!"},
+                {en:"vacation",pt:"férias",pron:"vaquêixan",ex:"I'm on vacation."},
+                {en:"luggage",pt:"bagagem",pron:"lâguidj",ex:"Where is my luggage?"},
+                {en:"umbrella",pt:"guarda-chuva",pron:"âmbréla",ex:"Take an umbrella."},
+                {en:"wallet",pt:"carteira",pron:"uólet",ex:"I lost my wallet."},
+                {en:"password",pt:"senha",pron:"pésuârd",ex:"I forgot my password."}
+            ]
+        };
+        Object.keys(EXTRA_WORDS).forEach(themeId => {
+            if (!LESSONS_DATA[themeId]) return;
+            const have = new Set(LESSONS_DATA[themeId].map(w => w.en.toLowerCase()));
+            EXTRA_WORDS[themeId].forEach(w => {
+                if (!have.has(w.en.toLowerCase())) { LESSONS_DATA[themeId].push(w); have.add(w.en.toLowerCase()); }
+            });
+        });
+
+        // Vocabulary imported from the user's PDF ("Vocabulário de 500 palavras em inglês").
+        const PDF_WORDS = {"people":[{"en":"hello","pt":"olá","pron":"rêlôu","ex":""},{"en":"hi","pt":"oi","pron":"rai","ex":""},{"en":"goodbye","pt":"tchau","pron":"gudbái","ex":""},{"en":"please","pt":"por favor","pron":"plíiz","ex":""},{"en":"thank you","pt":"obrigado(a)","pron":"thénk iú","ex":""},{"en":"sorry","pt":"desculpa","pron":"sóri","ex":""},{"en":"age","pt":"idade","pron":"êidj","ex":""},{"en":"parents","pt":"pais","pron":"pêrents","ex":""},{"en":"grandparents","pt":"avós","pron":"grénpêrents","ex":""},{"en":"nephew","pt":"sobrinho","pron":"néfiu","ex":""},{"en":"niece","pt":"sobrinha","pron":"níis","ex":""},{"en":"partner","pt":"parceiro(a)","pron":"pártner","ex":""},{"en":"couple","pt":"casal","pron":"kâpol","ex":""},{"en":"relative","pt":"parente","pron":"rélativ","ex":""},{"en":"relationship","pt":"relacionamento","pron":"rilêishanship","ex":""},{"en":"marriage","pt":"casamento","pron":"méridj","ex":""},{"en":"wedding","pt":"casamento/festa","pron":"uéding","ex":""},{"en":"single","pt":"solteiro(a)","pron":"síngol","ex":""},{"en":"married","pt":"casado(a)","pron":"mérid","ex":""},{"en":"together","pt":"juntos","pron":"tuguédher","ex":""},{"en":"care","pt":"cuidar/cuidado","pron":"kér","ex":""}],"home":[{"en":"dining room","pt":"sala de jantar","pron":"dáining rúum","ex":""},{"en":"ceiling","pt":"teto","pron":"síling","ex":""},{"en":"wardrobe","pt":"guarda-roupa","pron":"uórdrôub","ex":""}],"daily":[{"en":"laptop","pt":"notebook","pron":"léptop","ex":""},{"en":"remote control","pt":"controle remoto","pron":"rimôut kantrôul","ex":""},{"en":"notebook","pt":"caderno","pron":"nôutbuk","ex":""},{"en":"backpack","pt":"mochila","pron":"békpék","ex":""},{"en":"glasses","pt":"óculos","pron":"glésiz","ex":""},{"en":"spoon","pt":"colher","pron":"spúun","ex":""},{"en":"fork","pt":"garfo","pron":"fórk","ex":""},{"en":"knife","pt":"faca","pron":"náif","ex":""},{"en":"class","pt":"aula/turma","pron":"klés","ex":""},{"en":"lesson","pt":"lição","pron":"lésan","ex":""},{"en":"classmate","pt":"colega de classe","pron":"klésmêit","ex":""},{"en":"homework","pt":"lição de casa","pron":"rôumuârk","ex":""},{"en":"test","pt":"prova","pron":"tést","ex":""},{"en":"exam","pt":"exame","pron":"igzém","ex":""},{"en":"subject","pt":"matéria/assunto","pron":"sâbdjekt","ex":""},{"en":"grade","pt":"nota","pron":"grêid","ex":""},{"en":"workplace","pt":"local de trabalho","pron":"uârkplêis","ex":""},{"en":"meeting","pt":"reunião","pron":"míiting","ex":""},{"en":"schedule","pt":"agenda/horário","pron":"skédjul","ex":""},{"en":"break","pt":"intervalo","pron":"brêik","ex":""},{"en":"salary","pt":"salário","pron":"sélari","ex":""},{"en":"shirt","pt":"camisa","pron":"shârt","ex":""},{"en":"T-shirt","pt":"camiseta","pron":"tíishârt","ex":""},{"en":"pants","pt":"calça","pron":"pénts","ex":""},{"en":"jeans","pt":"calça jeans","pron":"djíinz","ex":""},{"en":"shorts","pt":"shorts","pron":"shórts","ex":""},{"en":"dress","pt":"vestido","pron":"drés","ex":""},{"en":"skirt","pt":"saia","pron":"skârt","ex":""},{"en":"jacket","pt":"jaqueta","pron":"djéket","ex":""},{"en":"coat","pt":"casaco","pron":"kôut","ex":""},{"en":"sweater","pt":"suéter","pron":"suéter","ex":""},{"en":"shoes","pt":"sapatos","pron":"shúuz","ex":""},{"en":"sneakers","pt":"tênis","pron":"sníikers","ex":""},{"en":"boots","pt":"botas","pron":"búuts","ex":""},{"en":"socks","pt":"meias","pron":"sóks","ex":""},{"en":"underwear","pt":"roupa íntima","pron":"ânderuér","ex":""},{"en":"bra","pt":"sutiã","pron":"brá","ex":""},{"en":"hat","pt":"chapéu","pron":"rét","ex":""},{"en":"cap","pt":"boné","pron":"kép","ex":""},{"en":"belt","pt":"cinto","pron":"bélt","ex":""},{"en":"scarf","pt":"cachecol","pron":"skárf","ex":""},{"en":"gloves","pt":"luvas","pron":"glâvz","ex":""},{"en":"size","pt":"tamanho","pron":"sáiz","ex":""},{"en":"pocket","pt":"bolso","pron":"póket","ex":""},{"en":"body","pt":"corpo","pron":"bódi","ex":""},{"en":"head","pt":"cabeça","pron":"réd","ex":""},{"en":"face","pt":"rosto","pron":"fêis","ex":""},{"en":"eye","pt":"olho","pron":"ái","ex":""},{"en":"ear","pt":"orelha","pron":"ír","ex":""},{"en":"nose","pt":"nariz","pron":"nôuz","ex":""},{"en":"mouth","pt":"boca","pron":"máuth","ex":""},{"en":"tooth","pt":"dente","pron":"túuth","ex":""},{"en":"teeth","pt":"dentes","pron":"tíith","ex":""},{"en":"hair","pt":"cabelo","pron":"rér","ex":""},{"en":"neck","pt":"pescoço","pron":"nék","ex":""},{"en":"shoulder","pt":"ombro","pron":"shôulder","ex":""},{"en":"arm","pt":"braço","pron":"árm","ex":""},{"en":"hand","pt":"mão","pron":"rénd","ex":""},{"en":"finger","pt":"dedo","pron":"fínger","ex":""},{"en":"leg","pt":"perna","pron":"lég","ex":""},{"en":"knee","pt":"joelho","pron":"níi","ex":""},{"en":"foot","pt":"pé","pron":"fut","ex":""},{"en":"feet","pt":"pés","pron":"fíit","ex":""},{"en":"back","pt":"costas","pron":"bék","ex":""},{"en":"stomach","pt":"estômago","pron":"stâmak","ex":""},{"en":"heart","pt":"coração","pron":"rárt","ex":""},{"en":"pain","pt":"dor","pron":"pêin","ex":""},{"en":"sun","pt":"sol","pron":"sân","ex":""},{"en":"sunny","pt":"ensolarado","pron":"sâni","ex":""},{"en":"rain","pt":"chuva","pron":"rêin","ex":""},{"en":"rainy","pt":"chuvoso","pron":"rêini","ex":""},{"en":"cloud","pt":"nuvem","pron":"kláud","ex":""},{"en":"cloudy","pt":"nublado","pron":"kláudi","ex":""},{"en":"wind","pt":"vento","pron":"uínd","ex":""},{"en":"windy","pt":"ventoso","pron":"uíndi","ex":""},{"en":"storm","pt":"tempestade","pron":"stórm","ex":""},{"en":"warm","pt":"morno/aquecido","pron":"uórm","ex":""},{"en":"cool","pt":"fresco","pron":"kúul","ex":""},{"en":"tree","pt":"árvore","pron":"tríi","ex":""},{"en":"flower","pt":"flor","pron":"fláuer","ex":""},{"en":"grass","pt":"grama","pron":"grés","ex":""},{"en":"mountain","pt":"montanha","pron":"máuntin","ex":""},{"en":"river","pt":"rio","pron":"ríver","ex":""},{"en":"sea","pt":"mar","pron":"síi","ex":""},{"en":"dog","pt":"cachorro","pron":"dóg","ex":""},{"en":"cat","pt":"gato","pron":"két","ex":""},{"en":"bird","pt":"pássaro","pron":"bârd","ex":""},{"en":"horse","pt":"cavalo","pron":"rórs","ex":""},{"en":"animal","pt":"animal","pron":"énimal","ex":""},{"en":"website","pt":"site","pron":"uébsáit","ex":""},{"en":"app","pt":"aplicativo","pron":"ép","ex":""},{"en":"username","pt":"nome de usuário","pron":"iúzernêim","ex":""},{"en":"screen","pt":"tela","pron":"skríin","ex":""},{"en":"keyboard","pt":"teclado","pron":"kíibórd","ex":""},{"en":"mouse","pt":"mouse","pron":"máus","ex":""},{"en":"charger","pt":"carregador","pron":"tchárdjer","ex":""},{"en":"battery","pt":"bateria","pron":"béteri","ex":""},{"en":"headphones","pt":"fones de ouvido","pron":"rédfôunz","ex":""},{"en":"speaker","pt":"alto-falante","pron":"spíiker","ex":""},{"en":"camera","pt":"câmera","pron":"kémera","ex":""},{"en":"video","pt":"vídeo","pron":"vídiou","ex":""},{"en":"text","pt":"texto/mensagem","pron":"tékst","ex":""},{"en":"file","pt":"arquivo","pron":"fáil","ex":""},{"en":"folder","pt":"pasta","pron":"fôulder","ex":""},{"en":"download","pt":"baixar","pron":"dáunlôud","ex":""},{"en":"upload","pt":"enviar arquivo","pron":"âplôud","ex":""},{"en":"share","pt":"compartilhar","pron":"shér","ex":""},{"en":"search","pt":"pesquisar","pron":"sârtch","ex":""},{"en":"link","pt":"link","pron":"link","ex":""}],"food":[{"en":"beans","pt":"feijão","pron":"bíinz","ex":""},{"en":"beef","pt":"carne bovina","pron":"bíif","ex":""},{"en":"yogurt","pt":"iogurte","pron":"iôugert","ex":""},{"en":"pasta","pt":"macarrão","pron":"pásta","ex":""},{"en":"noodles","pt":"macarrão","pron":"núudols","ex":""},{"en":"carrot","pt":"cenoura","pron":"kérat","ex":""},{"en":"lettuce","pt":"alface","pron":"létis","ex":""},{"en":"grape","pt":"uva","pron":"grêip","ex":""},{"en":"watermelon","pt":"melancia","pron":"uótermélan","ex":""},{"en":"pineapple","pt":"abacaxi","pron":"páinépol","ex":""},{"en":"lemon","pt":"limão","pron":"lémon","ex":""},{"en":"mango","pt":"manga","pron":"méngou","ex":""},{"en":"pear","pt":"pera","pron":"pér","ex":""},{"en":"peach","pt":"pêssego","pron":"píitch","ex":""},{"en":"avocado","pt":"abacate","pron":"avokádou","ex":""},{"en":"orange juice","pt":"suco de laranja","pron":"órindj djús","ex":""},{"en":"soda","pt":"refrigerante","pron":"sôuda","ex":""},{"en":"soft drink","pt":"refrigerante","pron":"sóft drink","ex":""},{"en":"lemonade","pt":"limonada","pron":"lémanêid","ex":""},{"en":"beer","pt":"cerveja","pron":"bíer","ex":""},{"en":"wine","pt":"vinho","pron":"uáin","ex":""},{"en":"hot chocolate","pt":"chocolate quente","pron":"rót tchóklet","ex":""},{"en":"ice","pt":"gelo","pron":"áis","ex":""},{"en":"milkshake","pt":"milk-shake","pron":"mílKshêik","ex":""},{"en":"dessert","pt":"sobremesa","pron":"dizârt","ex":""},{"en":"waiter","pt":"garçom","pron":"uêiter","ex":""},{"en":"waitress","pt":"garçonete","pron":"uêitris","ex":""},{"en":"order","pt":"pedido/pedir","pron":"órder","ex":""},{"en":"bill","pt":"conta","pron":"bil","ex":""},{"en":"tip","pt":"gorjeta","pron":"tip","ex":""},{"en":"table for two","pt":"mesa para dois","pron":"têibol fór túu","ex":""},{"en":"salty","pt":"salgado","pron":"sólti","ex":""},{"en":"sour","pt":"azedo","pron":"sáuer","ex":""},{"en":"spicy","pt":"apimentado","pron":"spáisi","ex":""},{"en":"bitter","pt":"amargo","pron":"bíter","ex":""},{"en":"tasty","pt":"saboroso","pron":"têisti","ex":""},{"en":"menu item","pt":"item do cardápio","pron":"méniu áitem","ex":""},{"en":"takeaway","pt":"para viagem","pron":"têikauêi","ex":""}],"time":[{"en":"wake up","pt":"acordar","pron":"uêik âp","ex":""},{"en":"get up","pt":"levantar","pron":"guét âp","ex":""},{"en":"take a shower","pt":"tomar banho","pron":"têik a cháuer","ex":""},{"en":"get dressed","pt":"vestir-se","pron":"guét drést","ex":""},{"en":"rest","pt":"descansar","pron":"rést","ex":""}],"verbs":[{"en":"teach","pt":"ensinar","pron":"tíitch","ex":""},{"en":"look for","pt":"procurar","pron":"luk fór","ex":""},{"en":"finish","pt":"terminar","pron":"fínish","ex":""}],"places":[{"en":"town","pt":"cidade pequena","pron":"táun","ex":""},{"en":"avenue","pt":"avenida","pron":"évanúu","ex":""},{"en":"neighborhood","pt":"bairro","pron":"nêiberrud","ex":""},{"en":"mall","pt":"shopping","pron":"mól","ex":""},{"en":"bus station","pt":"rodoviária","pron":"bâs stêishan","ex":""},{"en":"train station","pt":"estação de trem","pron":"trêin stêishan","ex":""},{"en":"cinema","pt":"cinema","pron":"sínema","ex":""},{"en":"building","pt":"prédio","pron":"bílding","ex":""},{"en":"truck","pt":"caminhão","pron":"trâk","ex":""},{"en":"boat","pt":"barco","pron":"bôut","ex":""},{"en":"passport","pt":"passaporte","pron":"pésport","ex":""},{"en":"suitcase","pt":"mala","pron":"súutkêis","ex":""},{"en":"trip","pt":"viagem","pron":"trip","ex":""},{"en":"traffic","pt":"trânsito","pron":"tréfik","ex":""},{"en":"driver","pt":"motorista","pron":"dráiver","ex":""},{"en":"passenger","pt":"passageiro","pron":"pésendjer","ex":""}],"adjectives":[{"en":"long","pt":"longo","pron":"lóng","ex":""}],"emotions":[{"en":"relaxed","pt":"relaxado","pron":"rilékst","ex":""},{"en":"interested","pt":"interessado","pron":"íntrested","ex":""},{"en":"shy","pt":"tímido","pron":"shái","ex":""},{"en":"friendly","pt":"amigável","pron":"fréndli","ex":""},{"en":"polite","pt":"educado","pron":"paláit","ex":""},{"en":"rude","pt":"grosseiro","pron":"rúud","ex":""},{"en":"patient","pt":"paciente","pron":"pêishent","ex":""},{"en":"honest","pt":"honesto","pron":"ónest","ex":""},{"en":"okay","pt":"tudo bem","pron":"ôukêi","ex":""}],"grammar":[{"en":"one","pt":"um","pron":"uân","ex":""},{"en":"two","pt":"dois","pron":"túu","ex":""},{"en":"three","pt":"três","pron":"thríi","ex":""},{"en":"four","pt":"quatro","pron":"fór","ex":""},{"en":"five","pt":"cinco","pron":"fáiv","ex":""},{"en":"six","pt":"seis","pron":"siks","ex":""},{"en":"seven","pt":"sete","pron":"séven","ex":""},{"en":"eight","pt":"oito","pron":"êit","ex":""},{"en":"nine","pt":"nove","pron":"náin","ex":""},{"en":"ten","pt":"dez","pron":"tén","ex":""},{"en":"red","pt":"vermelho","pron":"réd","ex":""},{"en":"blue","pt":"azul","pron":"blúu","ex":""},{"en":"yellow","pt":"amarelo","pron":"iélou","ex":""},{"en":"green","pt":"verde","pron":"gríin","ex":""},{"en":"black","pt":"preto","pron":"blék","ex":""},{"en":"white","pt":"branco","pron":"uáit","ex":""},{"en":"gray","pt":"cinza","pron":"grêi","ex":""},{"en":"pink","pt":"rosa","pron":"pink","ex":""},{"en":"purple","pt":"roxo","pron":"pârpol","ex":""},{"en":"brown","pt":"marrom","pron":"bráun","ex":""}]};
+        Object.keys(PDF_WORDS).forEach(themeId => {
+            if (!LESSONS_DATA[themeId]) return;
+            const have = new Set(LESSONS_DATA[themeId].map(w => w.en.toLowerCase()));
+            PDF_WORDS[themeId].forEach(w => { if (!have.has(w.en.toLowerCase())) { LESSONS_DATA[themeId].push(w); have.add(w.en.toLowerCase()); } });
+        });
+
+        // Generate themed exercises automatically from LESSONS_DATA so every topic
+        // has real, correctly translated multiple-choice and typing questions
+        // (each word becomes one "choose the translation" exercise and one "type
+        // it" exercise).
+        (function generateFullDatabase() {
+            let nextId = 500;
+            Object.keys(LESSONS_DATA).forEach(themeId => {
+                const words = LESSONS_DATA[themeId];
+                const allOtherWords = Object.keys(LESSONS_DATA)
+                    .flatMap(t => LESSONS_DATA[t])
+                    .map(w => w.en);
+
+                words.forEach((word, idx) => {
+                    let distractorPool = words.filter((_, i) => i !== idx).map(w => w.en);
+                    if (distractorPool.length < 3) {
+                        distractorPool = distractorPool.concat(
+                            allOtherWords.filter(f => f !== word.en && !distractorPool.includes(f))
+                        );
+                    }
+                    const distractors = distractorPool.sort(() => 0.5 - Math.random()).slice(0, 3);
+
+                    EXERCISES_DB.push({
+                        id: nextId++,
+                        level: 1,
+                        theme: themeId,
+                        type: "mc",
+                        prompt: `Como se diz '${word.pt}' em inglês?`,
+                        options: [word.en, ...distractors],
+                        answer: word.en,
+                        expl: `${word.en} significa "${word.pt}".${word.ex ? " Exemplo: " + word.ex : ""}`
+                    });
+
+                    EXERCISES_DB.push({
+                        id: nextId++,
+                        level: 2,
+                        theme: themeId,
+                        type: "type",
+                        prompt: `Digite '${word.pt}' em inglês:`,
+                        answer: word.en,
+                        expl: `A forma correta é "${word.en}".${word.ex ? " Exemplo: " + word.ex : ""}`
+                    });
+                });
+            });
+        })();
+
+        // Flat lookup (English word/phrase -> {pt, pron}) built from LESSONS_DATA,
+        // used to show translation + curated pronunciation under video examples.
+        const VOCAB_LOOKUP = {};
+        Object.keys(LESSONS_DATA).forEach(themeId => {
+            LESSONS_DATA[themeId].forEach(w => {
+                VOCAB_LOOKUP[w.en.toLowerCase()] = { pt: w.pt, pron: w.pron };
+            });
+        });
+
+        // Curated phrase -> real YouTube video map used by the "Pronúncia" tab to
+        // automatically show a usage example below the pronunciation breakdown.
+        // No API key and no external network call is involved: this is a small,
+        // hand-picked, offline lookup table bundled directly in the app (safe to
+        // publish, nothing to leak). Keys are normalized (lowercase, no punctuation).
+        // Add more entries here to grow automatic coverage over time.
+        const PHRASE_VIDEO_MAP = {
+            "how are you doing": { videoId: "sSZY11-tgX4", title: "Learn English: Hey, how are you doing?" },
+            "how are you": { videoId: "sSZY11-tgX4", title: "Learn English: Hey, how are you doing?" },
+            "what are you doing": { videoId: "cj3XjzMyXuE", title: "What are you doing right now? Let's learn and speak it in English!" },
+            "im tired": { videoId: "lYtCNEzUjGo", title: "3 ways to say 'I'm tired' in English!" },
+            "i am tired": { videoId: "lYtCNEzUjGo", title: "3 ways to say 'I'm tired' in English!" },
+            "thank you": { videoId: "Cax6m0cC_8Q", title: "How to Pronounce 'Thank you'" },
+            "thanks": { videoId: "Cax6m0cC_8Q", title: "How to Pronounce 'Thank you'" },
+            "water": { videoId: "0SqoJip29rw", title: "How to Say WATER — American English Pronunciation (Rachel's English)" },
+            "comfortable": { videoId: "XWNySmK01fg", title: "How to Pronounce COMFORTABLE (Rachel's English)" },
+            "monday": { videoId: "rZ9ygGOo7oU", title: "How to Pronounce the Days of the Week: American English (Rachel's English)" },
+            "tuesday": { videoId: "rZ9ygGOo7oU", title: "How to Pronounce the Days of the Week: American English (Rachel's English)" },
+            "wednesday": { videoId: "rZ9ygGOo7oU", title: "How to Pronounce the Days of the Week: American English (Rachel's English)" },
+            "thursday": { videoId: "rZ9ygGOo7oU", title: "How to Pronounce the Days of the Week: American English (Rachel's English)" },
+            "friday": { videoId: "rZ9ygGOo7oU", title: "How to Pronounce the Days of the Week: American English (Rachel's English)" },
+            "saturday": { videoId: "rZ9ygGOo7oU", title: "How to Pronounce the Days of the Week: American English (Rachel's English)" },
+            "sunday": { videoId: "rZ9ygGOo7oU", title: "How to Pronounce the Days of the Week: American English (Rachel's English)" },
+            "days of the week": { videoId: "rZ9ygGOo7oU", title: "How to Pronounce the Days of the Week: American English (Rachel's English)" }
+        };
+
+        // Bulk coverage: Rachel's English "100's of Words" vocabulary video (~2h). Every word
+        // below is explicitly taught in that video (vegetables, car, clothes, fruits, laundry).
+        (function addBulkVideos() {
+            const BULK = { videoId: "oVFNfYRLdqs", title: "English Vocabulary: Perfect Pronunciation for 100's of Words! (Rachel's English)", long: true };
+            [
+                "vegetable","vegetables","garlic","tomato","tomatoes","sandwich","potato","potatoes","onion","onions","green onion","mushroom","mushrooms",
+                "cauliflower","asparagus","artichoke","eggplant","parsnip","avocado","broccoli","cabbage","carrot","carrots","pepper","peppers",
+                "kale","lettuce","scallion","scallions","corn","celery","cucumber","radish",
+                "car","steering wheel","gear shift","park","reverse","neutral","drive","brake","dashboard","mirror","seatbelt","trunk","license plate",
+                "tires","tire","engine","horn","airbag","radio","headlights","windshield","gas","hood","bumper","speedometer","console",
+                "clothes","shirt","t-shirt","dress shirt","button down","underwear","bra","socks","hoodie","sweatshirt","dress","sweater","jeans",
+                "shorts","pants","khakis","swimsuit","bikini","suit","tie","blazer","overalls","vest","coat","jacket","poncho","fur coat","sweatpants","wrap",
+                "fruit","apple","banana","strawberry","blueberry","blackberry","raspberry","berry","pear","cantaloupe","cherry","cherries","grape","grapes",
+                "orange","grapefruit","tangerine","citrus","kiwi","lemon","lime","mango","peach","nectarine","pineapple","plum","watermelon","seed","pit","organic",
+                "laundry","laundry basket","basket","washing machine","dryer","iron","temperature","detergent","soap","bleach","spin","cycle","wash","rinse","button","buttons",
+                "first","second","third","fourth","fifth","three"
+            ].forEach(w => { if (!PHRASE_VIDEO_MAP[w]) PHRASE_VIDEO_MAP[w] = BULK; });
+        })();
+
+        // Normalizes a phrase into a PHRASE_VIDEO_MAP key: lowercase, no
+        // punctuation, no contraction apostrophes, single spaces.
+        function normalizePhraseKey(phrase) {
+            return phrase
+                .toLowerCase()
+                .trim()
+                .replace(/['’]/g, '')
+                .replace(/[.,!?;:]+/g, '')
+                .replace(/\s+/g, ' ');
+        }
+
+        function findExampleVideo(phrase) {
+            const key = normalizePhraseKey(phrase);
+            if (PHRASE_VIDEO_MAP[key]) return PHRASE_VIDEO_MAP[key];
+            // Fallback: look for the longest known sub-phrase inside what was typed
+            // (e.g. "thank you very much" -> "thank you", "cold water" -> "water").
+            const toks = key.split(' ');
+            for (let len = toks.length - 1; len >= 1; len--) {
+                for (let i = 0; i + len <= toks.length; i++) {
+                    const sub = toks.slice(i, i + len).join(' ');
+                    if (PHRASE_VIDEO_MAP[sub]) return PHRASE_VIDEO_MAP[sub];
+                }
+            }
+            return null;
+        }
+
+        // Breaks a phrase into every word (not just ones already in the curated
+        // vocabulary) so the UI can show a pronunciation row for each word.
+        function breakdownPhrase(phrase) {
+            const rawTokens = phrase.trim().split(/\s+/).filter(Boolean);
+            return rawTokens.map(tok => {
+                const clean = tok.toLowerCase().replace(/[.,!?;:'"]+/g, '');
+                const entry = VOCAB_LOOKUP[clean];
+                return {
+                    word: tok.replace(/[.,!?;:'"]+/g, ''),
+                    pt: entry ? entry.pt : null,
+                    pron: entry ? entry.pron : null,
+                    known: !!entry
+                };
+            });
+        }
+
+        function fillAndCheckPronunciation(phrase) {
+            document.getElementById('pron-input').value = phrase;
+            checkPronunciation();
+        }
+
+        function checkPronunciation() {
+            const input = document.getElementById('pron-input');
+            const phrase = input.value.trim();
+            const resultDiv = document.getElementById('pron-result');
+
+            if (!phrase) {
+                resultDiv.innerHTML = '';
+                return;
+            }
+
+            const words = breakdownPhrase(phrase);
+            const isSingleWord = words.length <= 1;
+
+            let html = `
+                <div style="margin-bottom: 10px;">
+                    <div style="font-size: 0.75rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 4px;">Frase pesquisada:</div>
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <div style="font-weight: 800; font-size: 1.15rem; color: var(--primary); font-style: italic;">"${phrase}"</div>
+                        <button class="audio-btn" onclick='playAudio(${JSON.stringify(phrase)})'>🔊</button>
+                    </div>
+                </div>
+            `;
+
+            if (!isSingleWord) {
+                html += `<div style="font-size: 0.75rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 4px;">Palavra por palavra</div>`;
+            }
+
+            html += words.map(w => `
+                <div style="display:flex; justify-content:space-between; align-items:center; padding: 8px 0; border-top: 1px solid var(--border);">
+                    <div>
+                        <b>${w.word}</b>
+                        ${w.known
+                            ? `<span style="color: var(--text-muted);"> — ${w.pt}</span><span style="color: var(--primary); font-style: italic;"> /${w.pron}/</span>`
+                            : `<span style="color: var(--text-muted); font-style: italic;"> — pronúncia não cadastrada, toque 🔊</span>`
+                        }
+                    </div>
+                    <button class="audio-btn" style="width:30px; height:30px; font-size:0.8rem;" onclick='playAudio(${JSON.stringify(w.word)})'>🔊</button>
+                </div>
+            `).join('');
+
+            const video = findExampleVideo(phrase);
+            html += `
+                <div id="pron-video-sec" style="margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--border);">
+                    <div style="font-size: 0.75rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 8px;">Vídeo de exemplo</div>
+                    ${video
+                        ? `<div class="video-embed-wrap">
+                             <iframe src="https://www.youtube.com/embed/${video.videoId}" title="${video.title}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen loading="lazy"></iframe>
+                           </div>`
+                        : `<div class="disclaimer-banner">Ainda não temos um vídeo salvo para "${phrase}". Use os botões abaixo para encontrar vídeos dessa palavra no YouTube ou no YouGlish.</div>`
+                    }
+                </div>
+            `;
+
+            const qEnc = encodeURIComponent(phrase);
+            const ytUrl = `https://www.youtube.com/results?search_query=${encodeURIComponent('how to pronounce ' + phrase)}`;
+            const ytUseUrl = `https://www.youtube.com/results?search_query=${encodeURIComponent('"' + phrase + '" english examples')}`;
+            const ygUrl = `https://youglish.com/pronounce/${qEnc}/english`;
+            html += `
+                <div id="pron-video-links" style="margin-top: 14px;">
+                    <div style="font-size: 0.75rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 8px;">Encontrar mais vídeos de "${phrase}"</div>
+                    ${video && video.long ? `<div style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 8px;">ℹ️ Este é um vídeo longo (cerca de 2h) com centenas de palavras. A sua palavra aparece em um trecho dele.</div>` : ''}
+                    <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+                        ${video ? `<a class="btn btn-primary" style="text-decoration: none;" href="https://www.youtube.com/watch?v=${video.videoId}" target="_blank" rel="noopener noreferrer">↗️ Abrir este vídeo no YouTube</a>` : ''}
+                        <a class="btn btn-primary" style="text-decoration: none;" href="${ytUrl}" target="_blank" rel="noopener noreferrer">▶️ Como pronunciar (YouTube)</a>
+                        <a class="btn btn-primary" style="text-decoration: none;" href="${ytUseUrl}" target="_blank" rel="noopener noreferrer">🎬 Exemplos de uso (YouTube)</a>
+                        <a class="btn btn-primary" style="text-decoration: none;" href="${ygUrl}" target="_blank" rel="noopener noreferrer">🗣️ Nativos falando (YouGlish)</a>
+                    </div>
+                </div>
+            `;
+
+            html += `
+                <div class="speech-box" style="margin-top: 16px;">
+                    <p style="font-size: 0.85rem; font-weight: 700; margin-bottom: 8px;">🎙️ Pratique a pronúncia:</p>
+                    <button id="btn-mic-pron" class="mic-btn" onclick='togglePronSpeech(${JSON.stringify(phrase)})'>🎙️</button>
+                    <p id="pron-speech-status" style="font-size: 0.85rem; color: var(--text-muted);">Toque no microfone e fale a frase acima</p>
+                    <div id="pron-speech-feedback" style="margin-top: 12px; text-align: left;"></div>
+                    <div class="disclaimer-banner">
+                        ℹ️ <b>Nota Educativa:</b> o reconhecimento de voz usa a inteligência de fala nativa do navegador. A avaliação compara o que foi reconhecido com a frase correta, palavra por palavra.
+                    </div>
+                </div>
+            `;
+
+            resultDiv.innerHTML = html;
+
+            // Put the video right below the searched word (before the word-by-word list).
+            const headerEl = resultDiv.firstElementChild;
+            const videoSec = document.getElementById('pron-video-sec');
+            const videoLinks = document.getElementById('pron-video-links');
+            if (headerEl && videoSec) {
+                videoSec.style.marginTop = '4px';
+                headerEl.insertAdjacentElement('afterend', videoSec);
+                if (videoLinks) videoSec.insertAdjacentElement('afterend', videoLinks);
+            }
+        }
+
+        let pronRecog = null;
+        function togglePronSpeech(targetPhrase) {
+            const btn = document.getElementById('btn-mic-pron');
+            const status = document.getElementById('pron-speech-status');
+            const feedback = document.getElementById('pron-speech-feedback');
+
+            if (btn.classList.contains('recording')) {
+                if (pronRecog) pronRecog.stop();
+                btn.classList.remove('recording');
+                status.innerText = "Toque no microfone e fale a frase acima";
+                return;
+            }
+
+            btn.classList.add('recording');
+            status.innerText = "Ouvindo... fale agora!";
+            feedback.innerHTML = '';
+
+            pronRecog = initSpeechRecognition((transcript) => {
+                btn.classList.remove('recording');
+                status.innerText = "Processado! Toque no microfone para tentar de novo.";
+                feedback.innerHTML = buildPronFeedback(targetPhrase, transcript);
+            }, () => {
+                btn.classList.remove('recording');
+            });
+
+            if (pronRecog) pronRecog.start();
+        }
+
+        // Compares what was actually said (transcript) against the target phrase,
+        // word by word, so the learner sees exactly which words came out wrong —
+        // not just an overall score.
+        function buildPronFeedback(target, transcript) {
+            const overall = calculateSimilarity(transcript, target);
+            const targetWords = target.trim().split(/\s+/).filter(Boolean);
+            const saidWords = transcript.trim().split(/\s+/).filter(Boolean);
+
+            let html = `<div style="margin-bottom: 10px;">Você disse: <b>"${transcript}"</b></div>`;
+
+            if (overall >= 80) {
+                html += `
+                    <div style="display:flex; justify-content:space-between; align-items:center; padding: 10px; border-radius: 10px; background: #dcfce7; color: #166534; font-weight: 700;">
+                        ✅ Muito bem! Pronúncia correta (${overall}% de acerto).
+                    </div>
+                `;
+                return html;
+            }
+
+            html += `
+                <div style="padding: 10px; border-radius: 10px; background: #fee2e2; color: #991b1b; font-weight: 700; margin-bottom: 10px;">
+                    ❌ Pronúncia incorreta (${overall}% de acerto). Veja o que ajustar:
+                </div>
+            `;
+
+            targetWords.forEach((tWord, i) => {
+                const saidWord = saidWords[i] || null;
+                const wordScore = saidWord ? calculateSimilarity(saidWord, tWord) : 0;
+                const isCorrect = saidWord && (normalizeText(saidWord) === normalizeText(tWord) || wordScore >= 70);
+                const lookup = VOCAB_LOOKUP[tWord.toLowerCase().replace(/[.,!?;:'"]+/g, '')];
+
+                html += `
+                    <div style="display:flex; justify-content:space-between; align-items:center; padding: 8px 0; border-top: 1px solid var(--border);">
+                        <div>
+                            <b>${tWord}</b>
+                            ${lookup ? `<span style="color: var(--primary); font-style: italic;"> /${lookup.pron}/</span>` : ''}
+                            ${isCorrect
+                                ? `<span style="color: #166534;"> ✅ correto</span>`
+                                : saidWord
+                                    ? `<span style="color: #991b1b;"> ❌ você disse "${saidWord}"</span>`
+                                    : `<span style="color: #991b1b;"> ❌ não foi dito</span>`
+                            }
+                        </div>
+                        <button class="audio-btn" style="width:30px; height:30px; font-size:0.8rem;" onclick='playAudio(${JSON.stringify(tWord)})'>🔊</button>
+                    </div>
+                `;
+            });
+
+            if (saidWords.length > targetWords.length) {
+                const extra = saidWords.slice(targetWords.length).join(' ');
+                html += `<div style="padding-top: 8px; font-size: 0.8rem; color: var(--text-muted);">Palavras extras ditas: "${extra}"</div>`;
+            }
+
+            return html;
+        }
+
+        let state = {
+            xp: 0,
+            streak: 1,
+            userLevel: 1,
+            selectedLevel: 1,
+            selectedTheme: "people",
+            mistakesHistory: [], // Array of exercise IDs
+            completedCount: 0,
+            correctCount: 0,
+            unlockedBadges: []
+        };
+
+        let currentQuizQueue = [];
+        let currentQuizIndex = 0;
+        let selectedOption = null;
+        let speechRecognition = null;
+
+        function loadState() {
+            const saved = localStorage.getItem("englishplus_state");
+            if (saved) {
+                try {
+                    state = { ...state, ...JSON.parse(saved) };
+                } catch(e) { console.error("Error loading state", e); }
+            }
+            updateUIStats();
+        }
+
+        function saveState() {
+            localStorage.setItem("englishplus_state", JSON.stringify(state));
+            updateUIStats();
+        }
+
+        function updateUIStats() {
+            document.getElementById("stat-xp").innerText = state.xp;
+            document.getElementById("stat-streak").innerText = state.streak;
+            document.getElementById("stat-user-lvl").innerText = Math.floor(state.xp / 100) + 1;
+            
+            // Profile stats
+            document.getElementById("prof-total-xp").innerText = state.xp;
+            document.getElementById("prof-completed").innerText = state.completedCount;
+            const accuracy = state.completedCount > 0 ? Math.round((state.correctCount / state.completedCount) * 100) : 100;
+            document.getElementById("prof-accuracy").innerText = accuracy + "%";
+
+            renderBadges();
+        }
+
+        // Picks the most natural-sounding English voice installed on the device
+        // (neural/"natural" voices first, then Google/Apple/Microsoft quality voices).
+        let ttsVoice = null;
+        function pickBestVoice() {
+            const voices = window.speechSynthesis.getVoices().filter(v => /^en/i.test(v.lang));
+            if (!voices.length) return null;
+            const score = v => {
+                let s = 0;
+                if (/natural|neural|online/i.test(v.name)) s += 60;
+                if (/Google US English/i.test(v.name)) s += 40;
+                if (/Samantha|Ava|Allison|Zoe|Siri|Aria|Jenny|Michelle|Guy/i.test(v.name)) s += 30;
+                if (/^en[-_]US/i.test(v.lang)) s += 15;
+                if (/compact|espeak|David|Zira|Mark/i.test(v.name)) s -= 25;
+                return s;
+            };
+            return voices.sort((a, b) => score(b) - score(a))[0];
+        }
+        if ('speechSynthesis' in window) {
+            window.speechSynthesis.onvoiceschanged = () => { ttsVoice = pickBestVoice(); };
+        }
+
+        function playAudio(text) {
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel(); // Stop current speech
+                if (!ttsVoice) ttsVoice = pickBestVoice();
+                const isSentence = String(text).trim().split(/\s+/).length > 2;
+                const utterance = new SpeechSynthesisUtterance(text);
+                if (ttsVoice) utterance.voice = ttsVoice;
+                utterance.lang = 'en-US';
+                utterance.rate = isSentence ? 0.97 : 0.88; // everyday pace for phrases, slower for single words
+                utterance.pitch = 1.0;
+                window.speechSynthesis.speak(utterance);
+            } else {
+                alert("Seu navegador não suporta a síntese de áudio SpeechSynthesis.");
+            }
+        }
+
+        function initSpeechRecognition(onResultCallback, onEndCallback) {
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            if (!SpeechRecognition) {
+                alert("O Reconhecimento de Voz não é suportado pelo seu navegador (Recomendado: Chrome/Edge).");
+                return null;
+            }
+            const recog = new SpeechRecognition();
+            recog.lang = 'en-US';
+            recog.continuous = false;
+            recog.interimResults = false;
+
+            recog.onresult = (event) => {
+                const transcript = event.results[0][0].transcript;
+                onResultCallback(transcript);
+            };
+
+            recog.onerror = (e) => {
+                console.error("Speech Recognition Error", e);
+                if (onEndCallback) onEndCallback();
+            };
+
+            recog.onend = () => {
+                if (onEndCallback) onEndCallback();
+            };
+
+            return recog;
+        }
+
+        // Strips accents, punctuation and extra spacing so typed answers are graded
+        // fairly even without perfect punctuation.
+        function normalizeText(str) {
+            return str
+                .normalize('NFD').replace(/[\u0300-\u036f]/g, '') // remove accents
+                .toLowerCase()
+                .trim()
+                .replace(/[.,\/#!$%\^&\*;:{}=\-_`~()?']/g, '')
+                .replace(/\s+/g, ' ');
+        }
+
+        // Text Similarity Calculation (Levenshtein distance)
+        function calculateSimilarity(str1, str2) {
+            const s1 = str1.toLowerCase().trim().replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g,"");
+            const s2 = str2.toLowerCase().trim().replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g,"");
+            
+            if (s1 === s2) return 100;
+            
+            const track = Array(s2.length + 1).fill(null).map(() =>
+            Array(s1.length + 1).fill(null));
+            for (let i = 0; i <= s1.length; i += 1) track[0][i] = i;
+            for (let j = 0; j <= s2.length; j += 1) track[j][0] = j;
+            for (let j = 1; j <= s2.length; j += 1) {
+                for (let i = 1; i <= s1.length; i += 1) {
+                    const indicator = s1[i - 1] === s2[j - 1] ? 0 : 1;
+                    track[j][i] = Math.min(
+                        track[j][i - 1] + 1,
+                        track[j - 1][i] + 1,
+                        track[j - 1][i - 1] + indicator,
+                    );
+                }
+            }
+            const distance = track[s2.length][s1.length];
+            const maxLen = Math.max(s1.length, s2.length);
+            return Math.round(((maxLen - distance) / maxLen) * 100);
+        }
+
+        function switchView(viewName) {
+            document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+
+            document.getElementById(`view-${viewName}`).classList.add('active');
+            const navBtn = document.getElementById(`nav-${viewName}`);
+            if (navBtn) navBtn.classList.add('active');
+
+            if (viewName === 'review') renderReviewTab();
+            if (viewName === 'dialogue') loadDialogueScenario();
+            if (viewName === 'lessons') renderLessonsTopics();
+        }
+
+        function renderLessonsTopics() {
+            const grid = document.getElementById('lessons-topic-grid');
+            const topics = THEMES.filter(t => LESSONS_DATA[t.id]);
+            grid.innerHTML = topics.map(t => `
+                <div class="theme-chip" onclick="openLessonTopic('${t.id}')">
+                    <span class="theme-icon">${t.icon}</span>
+                    <span style="font-size: 0.85rem;">${t.name}</span>
+                </div>
+            `).join('');
+            grid.style.display = 'grid';
+            document.getElementById('lessons-detail').style.display = 'none';
+        }
+
+        function openLessonTopic(themeId) {
+            const theme = THEMES.find(t => t.id === themeId);
+            const words = LESSONS_DATA[themeId] || [];
+
+            document.getElementById('lessons-topic-grid').style.display = 'none';
+            const detail = document.getElementById('lessons-detail');
+            detail.style.display = 'block';
+            detail.innerHTML = `
+                <button class="btn btn-secondary" style="margin-bottom: 16px;" onclick="renderLessonsTopics()">← Voltar aos tópicos</button>
+                <h2 class="section-title" style="font-size: 1.2rem;">${theme.icon} ${theme.name}</h2>
+                <p class="section-desc">Revise o vocabulário e depois pratique com exercícios.</p>
+                <div class="vocab-grid">
+                    ${words.map(w => `
+                        <div class="vocab-card">
+                            <div class="vocab-top">
+                                <span class="vocab-fr">${w.en}</span>
+                                <button class="audio-btn" style="width:34px; height:34px; font-size:0.85rem;" onclick='playAudio(${JSON.stringify(w.en)})'>🔊</button>
+                            </div>
+                            <div class="vocab-pt">${w.pt}</div>
+                            <div class="vocab-pron">/${w.pron}/</div>
+                            ${w.ex ? `<div class="vocab-example">"${w.ex}"</div>` : ""}
+                        </div>
+                    `).join('')}
+                </div>
+                <button class="btn btn-primary btn-full" style="margin-top: 20px; padding: 16px; font-size: 1.05rem;" onclick="startLessonQuiz('${themeId}')">🚀 Praticar este Tópico</button>
+            `;
+        }
+
+        function startLessonQuiz(themeId) {
+            const pool = EXERCISES_DB.filter(e => e.theme === themeId);
+            if (pool.length === 0) {
+                alert("Nenhum exercício encontrado para este tópico.");
+                return;
+            }
+            currentQuizQueue = pool.sort(() => 0.5 - Math.random()).slice(0, 10);
+            currentQuizIndex = 0;
+            switchView('practice');
+            renderCurrentQuestion();
+        }
+
+        function renderLevelsAndThemes() {
+            const lvlContainer = document.getElementById('level-selector');
+            lvlContainer.innerHTML = LEVELS.map(lvl => `
+                <div class="level-card ${state.selectedLevel === lvl.id ? 'active' : ''}" onclick="selectLevel(${lvl.id})">
+                    <div class="level-header">
+                        <span class="level-badge">${lvl.name.split(':')[0]}</span>
+                    </div>
+                    <div style="font-weight: 700; font-size: 1rem;">${lvl.name.split(':')[1]}</div>
+                    <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 4px;">${lvl.desc}</div>
+                </div>
+            `).join('');
+
+            const themeContainer = document.getElementById('theme-selector');
+            themeContainer.innerHTML = THEMES.map(t => `
+                <div class="theme-chip ${state.selectedTheme === t.id ? 'active' : ''}" onclick="selectTheme('${t.id}')">
+                    <span class="theme-icon">${t.icon}</span>
+                    <span style="font-size: 0.85rem;">${t.name}</span>
+                </div>
+            `).join('');
+        }
+
+        function selectLevel(id) {
+            state.selectedLevel = id;
+            renderLevelsAndThemes();
+        }
+
+        function selectTheme(id) {
+            state.selectedTheme = id;
+            renderLevelsAndThemes();
+        }
+
+        function startLesson() {
+            // Filter questions by level and theme
+            let pool = EXERCISES_DB.filter(e => e.level === state.selectedLevel && (e.theme === state.selectedTheme || e.theme === "general"));
+            if (pool.length === 0) pool = EXERCISES_DB.filter(e => e.level === state.selectedLevel);
+            
+            // Shuffle
+            currentQuizQueue = pool.sort(() => 0.5 - Math.random()).slice(0, 10);
+            currentQuizIndex = 0;
+
+            if (currentQuizQueue.length === 0) {
+                alert("Nenhum exercício encontrado para estes filtros.");
+                return;
+            }
+
+            switchView('practice');
+            renderCurrentQuestion();
+        }
+
+        function renderCurrentQuestion() {
+            const q = currentQuizQueue[currentQuizIndex];
+            const card = document.getElementById('quiz-card');
+            
+            // Progress Bar
+            const percent = ((currentQuizIndex) / currentQuizQueue.length) * 100;
+            document.getElementById('quiz-progress').style.width = `${percent}%`;
+            document.getElementById('quiz-counter').innerText = `Exercício ${currentQuizIndex + 1}/${currentQuizQueue.length}`;
+
+            // Reset buttons
+            document.getElementById('btn-check').style.display = 'block';
+            document.getElementById('btn-next').style.display = 'none';
+            document.getElementById('feedback-sheet').className = 'feedback-sheet';
+
+            selectedOption = null;
+
+            let html = `
+                <div style="text-align:center; font-size: 0.8rem; font-weight: 700; color: var(--primary); text-transform: uppercase;">
+                    ${q.type.toUpperCase()} • Level ${q.level}
+                </div>
+                <div class="prompt-box">
+                    ${q.prompt}
+                    ${q.target ? `<button class="audio-btn" onclick='playAudio(${JSON.stringify(q.target)})'>🔊</button>` : ''}
+                </div>
+            `;
+
+            if (q.type === 'mc') {
+                const options = [...q.options].sort(() => 0.5 - Math.random());
+                html += `
+                    <div class="options-grid two-cols">
+                        ${options.map(opt => `
+                            <button class="option-btn" onclick='selectOption(this, ${JSON.stringify(opt)})'>${opt}</button>
+                        `).join('')}
+                    </div>
+                `;
+            } else if (q.type === 'type' || q.type === 'write') {
+                html += `
+                    <input type="text" id="text-answer" class="text-input" placeholder="Digite sua resposta em inglês..." autocomplete="off">
+                `;
+            } else if (q.type === 'fill') {
+                // Fill-in-the-blank exercises use multiple-choice options when provided,
+                // falling back to free text if no options were given.
+                if (q.options && q.options.length) {
+                    const options = [...q.options].sort(() => 0.5 - Math.random());
+                    html += `
+                        <div class="options-grid two-cols">
+                            ${options.map(opt => `
+                                <button class="option-btn" onclick='selectOption(this, ${JSON.stringify(opt)})'>${opt}</button>
+                            `).join('')}
+                        </div>
+                    `;
+                } else {
+                    html += `
+                        <input type="text" id="text-answer" class="text-input" placeholder="Digite sua resposta em inglês..." autocomplete="off">
+                    `;
+                }
+            } else if (q.type === 'tf') {
+                html += `
+                    <div class="options-grid two-cols">
+                        <button class="option-btn" onclick="selectOption(this, 'True')">VERDADEIRO</button>
+                        <button class="option-btn" onclick="selectOption(this, 'False')">FALSO</button>
+                    </div>
+                `;
+            } else if (q.type === 'order') {
+                const words = [...q.words].sort(() => 0.5 - Math.random());
+                html += `
+                    <div id="selected-words-box" class="word-bank" style="background:#e2e8f0;"></div>
+                    <div class="word-bank">
+                        ${words.map(w => `<span class="word-tile" onclick='clickWordTile(this, ${JSON.stringify(w)})'>${w}</span>`).join('')}
+                    </div>
+                `;
+            } else if (q.type === 'listen') {
+                // Listening comprehension: play the audio and pick from the options.
+                const options = [...(q.options || [])].sort(() => 0.5 - Math.random());
+                html += `
+                    <div class="options-grid two-cols">
+                        ${options.map(opt => `
+                            <button class="option-btn" onclick='selectOption(this, ${JSON.stringify(opt)})'>${opt}</button>
+                        `).join('')}
+                    </div>
+                `;
+            } else if (q.type === 'speech') {
+                html += `
+                    <div class="speech-box">
+                        <button id="btn-mic-quiz" class="mic-btn" onclick='toggleQuizSpeech(${JSON.stringify(q.target || q.answer)})'>🎙️</button>
+                        <p id="speech-quiz-status" style="font-size: 0.85rem; color: var(--text-muted);">Clique no microfone e fale</p>
+                        <p id="speech-quiz-result" style="font-weight: 700; margin-top: 10px; color: var(--primary);"></p>
+                    </div>
+                    <div class="disclaimer-banner">
+                        ℹ️ <b>Aviso Educativo:</b> O sistema mede a porcentagem de similaridade do texto pronunciado com a frase correta.
+                    </div>
+                `;
+            }
+
+            card.innerHTML = html;
+        }
+
+        function selectOption(btn, val) {
+            document.querySelectorAll('.option-btn').forEach(b => b.classList.remove('selected'));
+            btn.classList.add('selected');
+            selectedOption = val;
+        }
+
+        function clickWordTile(tile, word) {
+            if (tile.classList.contains('used')) return;
+            tile.classList.add('used');
+
+            const box = document.getElementById('selected-words-box');
+            const newTile = document.createElement('span');
+            newTile.className = 'word-tile';
+            newTile.innerText = word;
+            newTile.onclick = () => {
+                box.removeChild(newTile);
+                tile.classList.remove('used');
+            };
+            box.appendChild(newTile);
+        }
+
+        let quizRecog = null;
+        function toggleQuizSpeech(targetText) {
+            const btn = document.getElementById('btn-mic-quiz');
+            const status = document.getElementById('speech-quiz-status');
+            const res = document.getElementById('speech-quiz-result');
+
+            if (btn.classList.contains('recording')) {
+                if (quizRecog) quizRecog.stop();
+                btn.classList.remove('recording');
+                status.innerText = "Clique para falar";
+                return;
+            }
+
+            btn.classList.add('recording');
+            status.innerText = "Ouvindo... Fale agora!";
+
+            quizRecog = initSpeechRecognition((transcript) => {
+                btn.classList.remove('recording');
+                status.innerText = "Processado!";
+                const similarity = calculateSimilarity(transcript, targetText);
+                res.innerText = `Você falou: "${transcript}" (Similaridade: ${similarity}%)`;
+                selectedOption = similarity >= 70 ? targetText : transcript;
+            }, () => {
+                btn.classList.remove('recording');
+            });
+
+            if (quizRecog) quizRecog.start();
+        }
+
+        function checkAnswer() {
+            const q = currentQuizQueue[currentQuizIndex];
+            let userAns = "";
+
+            if (q.type === 'mc' || q.type === 'tf' || q.type === 'listen') {
+                userAns = selectedOption;
+            } else if (q.type === 'type' || q.type === 'write') {
+                userAns = document.getElementById('text-answer').value.trim();
+            } else if (q.type === 'fill') {
+                userAns = (q.options && q.options.length)
+                    ? selectedOption
+                    : document.getElementById('text-answer').value.trim();
+            } else if (q.type === 'order') {
+                const tiles = document.getElementById('selected-words-box').querySelectorAll('.word-tile');
+                userAns = Array.from(tiles).map(t => t.innerText).join(' ');
+            } else if (q.type === 'speech') {
+                userAns = selectedOption;
+            }
+
+            if (!userAns) {
+                alert("Por favor, selecione ou digite uma resposta antes de verificar!");
+                return;
+            }
+
+            // Normalize text (lowercase, trim, strip punctuation and accents) so typed
+            // answers with missing accents/punctuation aren't unfairly marked wrong.
+            const isCorrect = normalizeText(userAns) === normalizeText(q.answer) ||
+                             (q.target && calculateSimilarity(userAns, q.target) >= 70);
+
+            const sheet = document.getElementById('feedback-sheet');
+            const title = document.getElementById('feedback-title');
+            const detail = document.getElementById('feedback-detail');
+
+            state.completedCount++;
+
+            if (isCorrect) {
+                sheet.className = 'feedback-sheet correct';
+                title.innerText = "✨ Excelente! Resposta Correta!";
+                detail.innerText = q.expl || "Você mandou muito bem!";
+                state.xp += 15;
+                state.correctCount++;
+            } else {
+                sheet.className = 'feedback-sheet incorrect';
+                title.innerText = "❌ Resposta Incorreta";
+                detail.innerText = `Resposta correta: "${q.answer || q.target}". ${q.expl}`;
+                
+                // Save mistake to history
+                if (!state.mistakesHistory.includes(q.id)) {
+                    state.mistakesHistory.push(q.id);
+                }
+            }
+
+            saveState();
+
+            document.getElementById('btn-check').style.display = 'none';
+            document.getElementById('btn-next').style.display = 'block';
+
+            // Always pronounce the English word/phrase, whether the answer was right or wrong.
+            speakQuestionWord(q);
+        }
+
+        function speakQuestionWord(q) {
+            let text = q.target || q.answer || '';
+            if (q.type === 'tf') {
+                // pick the quoted part of the prompt that is most likely English
+                const quotes = [...(q.prompt || '').matchAll(/'([^']+)'/g)].map(m => m[1]);
+                const hits = s => s.toLowerCase().replace(/[^a-z' ]/g, '').split(/\s+/).filter(w => VOCAB_LOOKUP[w]).length;
+                text = quotes.sort((a, b) => hits(b) - hits(a))[0] || '';
+            }
+            text = String(text).replace(/\s+([?.!,])/g, '$1').trim();
+            if (text) setTimeout(() => playAudio(text), 300);
+        }
+
+        function nextQuestion() {
+            currentQuizIndex++;
+            if (currentQuizIndex >= currentQuizQueue.length) {
+                document.getElementById('quiz-progress').style.width = '100%';
+                alert(`🎉 Lição Concluída! Você ganhou XP e avançou no seu aprendizado de inglês!`);
+                switchView('learn');
+            } else {
+                renderCurrentQuestion();
+            }
+        }
+
+        function exitLesson() {
+            if (confirm("Tem certeza que deseja sair da lição atual?")) {
+                switchView('learn');
+            }
+        }
+
+        const DIALOGUES = {
+            cafe: [
+                { bot: "Hello! Welcome to the café. What would you like?", target: "Hello, a coffee please", translation: "Olá, um café por favor" },
+                { bot: "Great. With sugar?", target: "Yes, with sugar, thank you", translation: "Sim, com açúcar, obrigado" },
+                { bot: "Here is your coffee. Anything else?", target: "Yes, how much is it?", translation: "Sim, quanto custa?" }
+            ],
+            direction: [
+                { bot: "Excuse me, are you looking for something?", target: "Where is the station, please?", translation: "Onde fica a estação, por favor?" },
+                { bot: "The station is straight ahead, two hundred meters.", target: "Thank you very much!", translation: "Muito obrigado!" }
+            ],
+            hotel: [
+                { bot: "Hello, do you have a reservation?", target: "Yes, under the name Smith", translation: "Sim, em nome de Smith" },
+                { bot: "Perfect. Here is your key, room 302.", target: "Thanks, where is the elevator?", translation: "Obrigado, onde fica o elevador?" }
+            ],
+            smalltalk: [
+                { bot: "Hi, I'm Anna. Nice to meet you!", target: "Nice to meet you too. I'm Carlos.", translation: "Prazer em conhecer você também. Eu sou o Carlos." },
+                { bot: "Where are you from?", target: "I'm from Brazil. What about you?", translation: "Eu sou do Brasil. E você?" },
+                { bot: "I'm from Canada. What do you do?", target: "I work in sales. And you?", translation: "Eu trabalho com vendas. E você?" },
+                { bot: "I'm a teacher. It was great talking to you!", target: "You too! See you around.", translation: "Você também! A gente se vê por aí." }
+            ],
+            restaurant: [
+                { bot: "Good evening! Table for how many?", target: "A table for two, please.", translation: "Uma mesa para dois, por favor." },
+                { bot: "Here's the menu. Can I get you something to drink?", target: "I'll have a glass of water, please.", translation: "Vou querer um copo de água, por favor." },
+                { bot: "Are you ready to order?", target: "Yes, I'd like the chicken with rice.", translation: "Sim, eu gostaria do frango com arroz." },
+                { bot: "Would you like anything else?", target: "Just the check, please.", translation: "Só a conta, por favor." }
+            ],
+            shopping: [
+                { bot: "Hi! Can I help you find anything?", target: "I'm just looking, thanks.", translation: "Estou só olhando, obrigado." },
+                { bot: "Sure. Let me know if you need anything.", target: "Do you have this in a medium?", translation: "Vocês têm este no tamanho M?" },
+                { bot: "Yes, the fitting room is over there.", target: "How much is it?", translation: "Quanto custa?" },
+                { bot: "It's thirty dollars.", target: "Great, I'll take it.", translation: "Ótimo, vou levar." }
+            ],
+            supermarket: [
+                { bot: "Hi there! Do you need help?", target: "Yes, where can I find the milk?", translation: "Sim, onde encontro o leite?" },
+                { bot: "It's in aisle five, next to the cheese.", target: "Thanks. Do you have fresh bread?", translation: "Obrigado. Vocês têm pão fresco?" },
+                { bot: "Yes, it's right by the entrance.", target: "Great. Do you accept credit cards?", translation: "Ótimo. Vocês aceitam cartão de crédito?" },
+                { bot: "Of course. Paper or plastic bag?", target: "Paper, please.", translation: "De papel, por favor." }
+            ],
+            taxi: [
+                { bot: "Hi! Where to?", target: "To the airport, please.", translation: "Para o aeroporto, por favor." },
+                { bot: "Sure. Is it your first time in the city?", target: "Yes, it is. How long does it take?", translation: "Sim. Quanto tempo leva?" },
+                { bot: "About thirty minutes.", target: "Could you turn on the air conditioning?", translation: "Você poderia ligar o ar-condicionado?" },
+                { bot: "We're here. That's twenty-five dollars.", target: "Keep the change. Thank you!", translation: "Pode ficar com o troco. Obrigado!" }
+            ],
+            airport: [
+                { bot: "Next, please. Passport and ticket?", target: "Here you go.", translation: "Aqui está." },
+                { bot: "Do you have any bags to check?", target: "Just one suitcase.", translation: "Só uma mala." },
+                { bot: "Window or aisle seat?", target: "A window seat, please.", translation: "Uma janela, por favor." },
+                { bot: "Here's your boarding pass. Gate twelve.", target: "Thank you. Where is gate twelve?", translation: "Obrigado. Onde fica o portão doze?" }
+            ],
+            doctor: [
+                { bot: "Good morning. What seems to be the problem?", target: "I have a headache and a sore throat.", translation: "Estou com dor de cabeça e dor de garganta." },
+                { bot: "How long have you felt this way?", target: "Since yesterday morning.", translation: "Desde ontem de manhã." },
+                { bot: "Do you have a fever?", target: "Yes, a little.", translation: "Sim, um pouco." },
+                { bot: "Take this medicine twice a day and get some rest.", target: "Thank you, doctor.", translation: "Obrigado, doutor." }
+            ],
+            phone: [
+                { bot: "Hello, this is Mark. Who's calling?", target: "Hi, this is Ana. Can I speak to Sarah?", translation: "Oi, aqui é a Ana. Posso falar com a Sarah?" },
+                { bot: "I'm sorry, she's not here right now.", target: "Can I leave a message?", translation: "Posso deixar um recado?" },
+                { bot: "Sure. What's your number?", target: "My number is 555-1234.", translation: "Meu número é 555-1234." },
+                { bot: "Got it. I'll tell her you called.", target: "Thank you. Have a nice day!", translation: "Obrigada. Tenha um bom dia!" }
+            ],
+            work: [
+                { bot: "Good morning! How was your weekend?", target: "It was great, thanks. How about yours?", translation: "Foi ótimo, obrigado. E o seu?" },
+                { bot: "Pretty relaxing. Do you have a minute?", target: "Sure, what's up?", translation: "Claro, o que houve?" },
+                { bot: "Can you send me the report today?", target: "Of course. I'll send it this afternoon.", translation: "Claro. Vou enviar hoje à tarde." },
+                { bot: "Perfect. Thanks!", target: "No problem. Let me know if you need anything else.", translation: "Sem problema. Me avise se precisar de mais alguma coisa." }
+            ]
+        };
+
+        let currentDialogueStep = 0;
+        let dialogueRecog = null;
+
+        function loadDialogueScenario() {
+            const scenario = document.getElementById('dialogue-scenario-select').value;
+            currentDialogueStep = 0;
+            const chatBox = document.getElementById('chat-box');
+            chatBox.innerHTML = '';
+            
+            appendBotMessage(DIALOGUES[scenario][0].bot);
+            document.getElementById('target-phrase').innerText = `"${DIALOGUES[scenario][0].target}" (${DIALOGUES[scenario][0].translation})`;
+        }
+
+        function appendBotMessage(text) {
+            const chatBox = document.getElementById('chat-box');
+            const div = document.createElement('div');
+            div.className = 'chat-bubble bot';
+            div.innerHTML = `
+                <div class="chat-author">Attendant 🇺🇸</div>
+                <div>${text} <button class="audio-btn" style="width:28px; height:28px; font-size:0.7rem;" onclick='playAudio(${JSON.stringify(text)})'>🔊</button></div>
+            `;
+            chatBox.appendChild(div);
+            chatBox.scrollTop = chatBox.scrollHeight;
+            playAudio(text);
+        }
+
+        function appendUserMessage(text) {
+            const chatBox = document.getElementById('chat-box');
+            const div = document.createElement('div');
+            div.className = 'chat-bubble user';
+            div.innerHTML = `
+                <div class="chat-author">Você</div>
+                <div>${text}</div>
+            `;
+            chatBox.appendChild(div);
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+        function toggleDialogueSpeech() {
+            const scenario = document.getElementById('dialogue-scenario-select').value;
+            const stepData = DIALOGUES[scenario][currentDialogueStep];
+            const btn = document.getElementById('btn-mic-dialogue');
+            const status = document.getElementById('speech-status-dialogue');
+            const res = document.getElementById('recognized-text-dialogue');
+
+            if (btn.classList.contains('recording')) {
+                if (dialogueRecog) dialogueRecog.stop();
+                btn.classList.remove('recording');
+                status.innerText = "Clique para falar";
+                return;
+            }
+
+            btn.classList.add('recording');
+            status.innerText = "Ouvindo... Fale a frase acima!";
+
+            dialogueRecog = initSpeechRecognition((transcript) => {
+                btn.classList.remove('recording');
+                status.innerText = "Processado!";
+                
+                const sim = calculateSimilarity(transcript, stepData.target);
+                res.innerText = `Você falou: "${transcript}" (Precisão: ${sim}%)`;
+
+                if (sim >= 60) {
+                    appendUserMessage(transcript);
+                    state.xp += 20;
+                    saveState();
+
+                    currentDialogueStep++;
+                    if (currentDialogueStep < DIALOGUES[scenario].length) {
+                        setTimeout(() => {
+                            const nextData = DIALOGUES[scenario][currentDialogueStep];
+                            appendBotMessage(nextData.bot);
+                            document.getElementById('target-phrase').innerText = `"${nextData.target}" (${nextData.translation})`;
+                        }, 1000);
+                    } else {
+                        setTimeout(() => {
+                            appendBotMessage("Congratulations! You completed this dialogue successfully!");
+                            document.getElementById('target-phrase').innerText = "Diálogo Finalizado 🎉";
+                        }, 1000);
+                    }
+                } else {
+                    alert("A pronúncia/frase não foi reconhecida com similaridade suficiente. Tente novamente!");
+                }
+            }, () => {
+                btn.classList.remove('recording');
+            });
+
+            if (dialogueRecog) dialogueRecog.start();
+        }
+
+        function renderReviewTab() {
+            const container = document.getElementById('review-summary');
+            if (state.mistakesHistory.length === 0) {
+                container.innerHTML = `
+                    <div style="font-size: 3rem; margin-bottom: 10px;">🎉</div>
+                    <h3 style="margin-bottom: 8px;">Nenhum erro pendente!</h3>
+                    <p style="color: var(--text-muted);">Você respondeu corretamente a todos os seus exercícios anteriores.</p>
+                `;
+            } else {
+                container.innerHTML = `
+                    <div style="font-size: 2.5rem; margin-bottom: 10px; color: var(--secondary);">⚠️</div>
+                    <h3 style="margin-bottom: 8px;">Você tem ${state.mistakesHistory.length} erro(s) armazenado(s)</h3>
+                    <p style="color: var(--text-muted); margin-bottom: 20px;">Refaça estes exercícios para remover os erros do seu histórico.</p>
+                    <button class="btn btn-primary" onclick="startMistakesReview()">Refazer Exercícios Incorretos</button>
+                `;
+            }
+        }
+
+        function startMistakesReview() {
+            currentQuizQueue = EXERCISES_DB.filter(e => state.mistakesHistory.includes(e.id));
+            currentQuizIndex = 0;
+            switchView('practice');
+            renderCurrentQuestion();
+        }
+
+        const BADGES_LIST = [
+            { id: "first_step", title: "Primeiros Passos", desc: "Ganhe seus primeiros 15 XP", req: (s) => s.xp >= 15, icon: "🌱" },
+            { id: "english_speaker", title: "Orador em Inglês", desc: "Alcance 100 XP", req: (s) => s.xp >= 100, icon: "🗣️" },
+            { id: "master_mind", title: "Mestre em Inglês", desc: "Alcance 500 XP", req: (s) => s.xp >= 500, icon: "👑" },
+            { id: "persistent", title: "Persistente", desc: "Complete 10 exercícios", req: (s) => s.completedCount >= 10, icon: "🔥" }
+        ];
+
+        function renderBadges() {
+            const container = document.getElementById('badges-container');
+            container.innerHTML = BADGES_LIST.map(b => {
+                const unlocked = b.req(state);
+                return `
+                    <div class="badge-card ${unlocked ? 'unlocked' : ''}">
+                        <div class="badge-icon">${b.icon}</div>
+                        <div class="badge-title">${b.title}</div>
+                        <div class="badge-desc">${b.desc}</div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function resetProgress() {
+            if (confirm("Tem certeza de que deseja apagar todo o seu progresso armazenado?")) {
+                localStorage.removeItem("englishplus_state");
+                state = {
+                    xp: 0,
+                    streak: 1,
+                    userLevel: 1,
+                    selectedLevel: 1,
+                    selectedTheme: "people",
+                    mistakesHistory: [],
+                    completedCount: 0,
+                    correctCount: 0,
+                    unlockedBadges: []
+                };
+                saveState();
+                switchView('learn');
+            }
+        }
+
+        window.onload = function() {
+            loadState();
+            renderLevelsAndThemes();
+        };
+    </script>
+</body>
+</html>
